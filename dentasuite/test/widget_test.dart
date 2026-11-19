@@ -13,7 +13,11 @@ import 'package:dentasuite/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
+<<<<<<< HEAD
     await tester.pumpWidget(const MyApp());
+=======
+    await tester.pumpWidget(const DentaSuite());
+>>>>>>> c8a408efece41f0691a5cac3be1eb1e700013f91
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
