@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 
 void main() {
-  runApp(const DentDeskApp());
+  runApp(const DentaSuite());
 }
 
-class DentDeskApp extends StatelessWidget {
-  const DentDeskApp({super.key});
+class DentaSuite extends StatelessWidget {
+  const DentaSuite({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'DentDesk',
+      title: 'DentaSuite',
       home: const LoginScreen(),
     );
   }
