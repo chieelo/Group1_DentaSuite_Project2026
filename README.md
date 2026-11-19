@@ -1,1 +1,1 @@
-# Group1_DentDesk_Project2026
+# Group1_DentaSuite_Project2026
