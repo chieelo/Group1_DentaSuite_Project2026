@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../widgets/shared_widgets.dart';
 
@@ -9,6 +7,8 @@ class TreatmentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.pal;
+
     final treatments = [
       ['Tooth Extraction', 'Maria Santos', 'November 19, 2026'],
       ['Dental Cleaning', 'Juan Dela Cruz', 'November 18, 2026'],
@@ -35,10 +35,6 @@ class TreatmentsScreen extends StatelessWidget {
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: navy,
-                foregroundColor: Colors.white,
-              ),
               child: const Icon(Icons.add),
             ),
           ],
@@ -47,24 +43,15 @@ class TreatmentsScreen extends StatelessWidget {
         const SizedBox(height: 20),
 
         ...treatments.map((treatment) {
-          return Container(
+          return appCard(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(13),
-              border: Border.all(
-                color: const Color(0xFFE8EBF0),
-              ),
-            ),
             child: Row(
               children: [
-                const CircleAvatar(
-                  backgroundColor: Color(0xFFEAF0F8),
-                  child: Icon(
-                    Icons.medical_services_rounded,
-                    color: navy,
-                  ),
+                iconBubble(
+                  Icons.medical_services_rounded,
+                  const Color(0xFF10B981),
+                  size: 42,
                 ),
 
                 const SizedBox(width: 12),
@@ -75,32 +62,23 @@ class TreatmentsScreen extends StatelessWidget {
                     children: [
                       Text(
                         treatment[0],
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: ts(context, 13, weight: FontWeight.w600),
                       ),
                       Text(
                         treatment[1],
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          color: Colors.grey[600],
-                        ),
+                        style: ts(context, 11, sub: true),
                       ),
                       Text(
                         treatment[2],
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          color: Colors.grey,
-                        ),
+                        style: ts(context, 10, sub: true),
                       ),
                     ],
                   ),
                 ),
 
-                const Icon(
-                  Icons.chevron_right,
-                  color: Colors.grey,
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: p.textSub,
                 ),
               ],
             ),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,11 +18,12 @@ class CertificatesScreen extends StatelessWidget {
 
         const SizedBox(height: 20),
 
+        // Hero card: gradient + white text is readable in both modes.
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: navy,
-            borderRadius: BorderRadius.circular(15),
+            gradient: heroGradient,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,30 +92,26 @@ class CertificatesScreen extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        _certificate('Maria Santos', 'CERT-0001'),
-        _certificate('Juan Dela Cruz', 'CERT-0002'),
-        _certificate('Ana Reyes', 'CERT-0003'),
+        _certificate(context, 'Maria Santos', 'CERT-0001'),
+        _certificate(context, 'Juan Dela Cruz', 'CERT-0002'),
+        _certificate(context, 'Ana Reyes', 'CERT-0003'),
       ],
     );
   }
 
-  Widget _certificate(String name, String id) {
-    return Container(
+  Widget _certificate(BuildContext context, String name, String id) {
+    final p = context.pal;
+
+    return appCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFE8EBF0),
-        ),
-      ),
       child: Row(
         children: [
-          const Icon(
+          iconBubble(
             Icons.picture_as_pdf_rounded,
-            color: Colors.redAccent,
-            size: 30,
+            Colors.redAccent,
+            size: 42,
+            iconSize: 24,
           ),
 
           const SizedBox(width: 12),
@@ -126,26 +122,14 @@ class CertificatesScreen extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: ts(context, 13, weight: FontWeight.w600),
                 ),
-                Text(
-                  id,
-                  style: GoogleFonts.poppins(
-                    fontSize: 10,
-                    color: Colors.grey,
-                  ),
-                ),
+                Text(id, style: ts(context, 10, sub: true)),
               ],
             ),
           ),
 
-          const Icon(
-            Icons.more_vert,
-            color: Colors.grey,
-          ),
+          Icon(Icons.more_vert, color: p.textSub),
         ],
       ),
     );
