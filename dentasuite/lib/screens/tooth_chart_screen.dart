@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,39 +18,35 @@ class ToothChartScreen extends StatelessWidget {
 
           Text(
             'Sample tooth chart interface',
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              color: Colors.grey,
-            ),
+            style: ts(context, 11, sub: true),
           ),
 
           const SizedBox(height: 20),
 
-          _toothRow(List.generate(8, (i) => 18 - i)),
+          _toothRow(context, List.generate(8, (i) => 18 - i)),
           const SizedBox(height: 10),
-          _toothRow(List.generate(8, (i) => 28 + i)),
+          _toothRow(context, List.generate(8, (i) => 28 + i)),
 
           const Divider(height: 35),
 
-          _toothRow(List.generate(8, (i) => 48 - i)),
+          _toothRow(context, List.generate(8, (i) => 48 - i)),
           const SizedBox(height: 10),
-          _toothRow(List.generate(8, (i) => 38 + i)),
+          _toothRow(context, List.generate(8, (i) => 38 + i)),
 
           const SizedBox(height: 20),
 
           Text(
             'Tap a tooth to view its details.',
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              color: Colors.grey,
-            ),
+            style: ts(context, 11, sub: true),
           ),
         ],
       ),
     );
   }
 
-  Widget _toothRow(List<int> teeth) {
+  Widget _toothRow(BuildContext context, List<int> teeth) {
+    final p = context.pal;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: teeth.map((number) {
@@ -59,6 +54,7 @@ class ToothChartScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(2),
             child: InkWell(
+              borderRadius: BorderRadius.circular(6),
               onTap: () {
                 // Tooth selection can be implemented here.
               },
@@ -66,10 +62,8 @@ class ToothChartScreen extends StatelessWidget {
                 height: 43,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: const Color(0xFFB8C3D1),
-                  ),
+                  color: p.surface,
+                  border: Border.all(color: p.border),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: FittedBox(
@@ -78,7 +72,7 @@ class ToothChartScreen extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: navy,
+                      color: p.textMain,
                     ),
                   ),
                 ),

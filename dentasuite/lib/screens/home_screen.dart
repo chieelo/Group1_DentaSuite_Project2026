@@ -1,7 +1,8 @@
-
 import 'package:dentasuite/widgets/app_logo.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../widgets/shared_widgets.dart';
 import 'dashboard_screen.dart';
 import 'patients_screen.dart';
 import 'treatments_screen.dart';
@@ -23,22 +24,26 @@ class DentaSuiteHomeScreen extends StatefulWidget {
       _DentaSuiteHomeScreenState();
 }
 
-class _DentaSuiteHomeScreenState
-    extends State<DentaSuiteHomeScreen> {
-  static const Color mint = Color(0xFFC2FFE1);
-  static const Color navy = Color(0xFF0D203B);
-
+class _DentaSuiteHomeScreenState extends State<DentaSuiteHomeScreen> {
   int selectedIndex = 0;
 
-  final List<String> pageTitles = [
-    'Dashboard',
+  static const List<String> navLabels = [
+    'Home',
     'Patients',
     'Treatments',
     'Certificates',
-    'My Profile',
+    'Profile',
   ];
 
-  final List<IconData> icons = [
+  static const List<IconData> icons = [
+    Icons.dashboard_outlined,
+    Icons.people_alt_outlined,
+    Icons.medical_services_outlined,
+    Icons.description_outlined,
+    Icons.person_outline_rounded,
+  ];
+
+  static const List<IconData> selectedIcons = [
     Icons.dashboard_rounded,
     Icons.people_alt_rounded,
     Icons.medical_services_rounded,
@@ -48,13 +53,7 @@ class _DentaSuiteHomeScreenState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final Color surfaceColor =
-        isDark ? const Color(0xFF172B46) : Colors.white;
-
-    final Color textColor = isDark ? Colors.white : navy;
+    final p = context.pal;
 
     final List<Widget> pages = [
       const DashboardScreen(),
@@ -68,23 +67,18 @@ class _DentaSuiteHomeScreenState
     ];
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: p.bg,
 
       appBar: AppBar(
-        backgroundColor: surfaceColor,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: p.surface,
         title: Row(
           children: [
-            const AppLogo(
-                width: 27,
-                height: 27,
-              ),
+            const AppLogo(width: 30, height: 30),
             const SizedBox(width: 10),
             Text(
               'DentaSuite',
-              style: TextStyle(
-                color: textColor,
+              style: GoogleFonts.poppins(
+                color: p.textMain,
                 fontWeight: FontWeight.w700,
                 fontSize: 20,
               ),
@@ -94,80 +88,45 @@ class _DentaSuiteHomeScreenState
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(
-              Icons.notifications_none_rounded,
-              color: textColor,
-              size: 27,
+            icon: Badge(
+              smallSize: 8,
+              child: Icon(
+                Icons.notifications_none_rounded,
+                color: p.textMain,
+                size: 26,
+              ),
             ),
           ),
           const SizedBox(width: 8),
         ],
-      ),
-
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            color: surfaceColor,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 15),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              pageTitles[selectedIndex],
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: IndexedStack(
-              index: selectedIndex,
-              children: pages,
-            ),
-          ),
-        ],
-      ),
-
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: surfaceColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 12,
-              offset: const Offset(0, -3),
-            ),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, color: p.border),
         ),
-        child: SafeArea(
-          child: BottomNavigationBar(
-            currentIndex: selectedIndex,
-            onTap: (index) {
-              setState(() {
-                selectedIndex = index;
-              });
-            },
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: surfaceColor,
-            selectedItemColor: isDark ? mint : navy,
-            unselectedItemColor:
-                theme.colorScheme.onSurfaceVariant,
-            selectedFontSize: 11,
-            unselectedFontSize: 10,
-            elevation: 0,
-            showUnselectedLabels: true,
-            items: List.generate(
-              icons.length,
-              (index) => BottomNavigationBarItem(
-                icon: Icon(icons[index]),
-                label: pageTitles[index] == 'Dashboard'
-                    ? 'Home'
-                    : pageTitles[index] == 'My Profile'
-                        ? 'Profile'
-                        : pageTitles[index],
-              ),
+      ),
+
+      body: IndexedStack(
+        index: selectedIndex,
+        children: pages,
+      ),
+
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: p.border)),
+        ),
+        child: NavigationBar(
+          selectedIndex: selectedIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              selectedIndex = index;
+            });
+          },
+          destinations: List.generate(
+            navLabels.length,
+            (index) => NavigationDestination(
+              icon: Icon(icons[index]),
+              selectedIcon: Icon(selectedIcons[index]),
+              label: navLabels[index],
             ),
           ),
         ),

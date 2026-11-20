@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -101,8 +100,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
       return 'Contact number is required.';
     }
 
-    if (!RegExp(r'^(09\d{9}|\+639\d{9})$')
-        .hasMatch(value.trim())) {
+    if (!RegExp(r'^(09\d{9}|\+639\d{9})$').hasMatch(value.trim())) {
       return 'Enter a valid PH mobile number.';
     }
 
@@ -155,16 +153,22 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.pal;
+
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: p.bg,
       appBar: AppBar(
-        backgroundColor: navy,
+        // Navy in light mode, card color in dark mode.
+        // Title and back arrow are ALWAYS white so they are always visible.
+        backgroundColor: p.isDark ? p.surface : navy,
         foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           'New Patient Record',
           style: GoogleFonts.poppins(
             fontSize: 17,
             fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
       ),
@@ -247,7 +251,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                   'Please answer the following questions honestly.',
                   style: GoogleFonts.poppins(
                     fontSize: 11,
-                    color: Colors.grey,
+                    color: p.textSub,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -385,7 +389,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
                 _text(
                   'Please check if present:',
-                  color: Colors.grey,
+                  sub: true,
                   size: 11,
                 ),
 
@@ -407,7 +411,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                         Navigator.pop(context);
                       },
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: navy,
                         padding: const EdgeInsets.symmetric(
                           vertical: 13,
                         ),
@@ -427,8 +430,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                     child: ElevatedButton(
                       onPressed: savePatient,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: navy,
-                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           vertical: 13,
                         ),
@@ -502,6 +503,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     });
   }
 
+  // ───────────────────────── UI helpers ─────────────────────────
+
   Widget _sectionHeader(IconData icon, String title) {
     return Container(
       width: double.infinity,
@@ -510,8 +513,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         vertical: 13,
       ),
       decoration: BoxDecoration(
-        color: navy,
-        borderRadius: BorderRadius.circular(8),
+        gradient: heroGradient, // white text is readable in both modes
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
@@ -535,17 +538,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   }
 
   Widget _sectionCard(List<Widget> children) {
-    return Container(
-      width: double.infinity,
+    return appCard(
       margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE8EBF0),
-        ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
@@ -554,6 +548,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   }
 
   Widget _genderSelection() {
+    final p = context.pal;
+
     return FormField<String>(
       validator: (value) {
         if (gender == null) {
@@ -584,7 +580,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                       },
                       contentPadding: EdgeInsets.zero,
                       dense: true,
-                      activeColor: navy,
+                      activeColor: p.accent,
                       title: _text(
                         option,
                         size: 11,
@@ -599,8 +595,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                   padding: const EdgeInsets.only(left: 12),
                   child: Text(
                     field.errorText!,
-                    style: const TextStyle(
-                      color: Colors.red,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
                       fontSize: 11,
                     ),
                   ),
@@ -618,6 +614,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
+    final p = context.pal;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 13),
       child: Column(
@@ -627,40 +625,17 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
           const SizedBox(height: 6),
 
+          // Fill color, borders and hint color come from the global
+          // inputDecorationTheme in main.dart (works in light + dark).
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,
             validator: validator,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-            ),
+            cursorColor: p.accent,
+            style: ts(context, 12),
             decoration: InputDecoration(
               hintText: 'Enter $label',
-              hintStyle: GoogleFonts.poppins(
-                fontSize: 11,
-                color: Colors.grey,
-              ),
-              errorStyle: GoogleFonts.poppins(
-                fontSize: 10,
-              ),
-              filled: true,
-              fillColor: const Color(0xFFF8F9FB),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E4EA),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E4EA),
-                ),
-              ),
+              hintStyle: ts(context, 11, sub: true),
             ),
           ),
         ],
@@ -674,6 +649,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     List<String> options,
     ValueChanged<String?> onChanged,
   ) {
+    final p = context.pal;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 13),
       child: Column(
@@ -686,35 +663,23 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
           DropdownButtonFormField<String>(
             initialValue: value,
             isExpanded: true,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: navy,
-            ),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFF8F9FB),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E4EA),
-                ),
-              ),
+            dropdownColor: p.surface,
+            style: ts(context, 12),
+            icon: Icon(
+              Icons.arrow_drop_down_rounded,
+              color: p.textSub,
             ),
             hint: Text(
               'Select $label',
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                color: Colors.grey,
-              ),
+              style: ts(context, 11, sub: true),
             ),
             items: options.map((option) {
               return DropdownMenuItem(
                 value: option,
-                child: Text(option),
+                child: Text(
+                  option,
+                  style: ts(context, 12),
+                ),
               );
             }).toList(),
             onChanged: onChanged,
@@ -729,6 +694,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     DateTime? date,
     VoidCallback onTap,
   ) {
+    final p = context.pal;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 13),
       child: Column(
@@ -740,36 +707,34 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
           InkWell(
             onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
             child: Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 13,
+                horizontal: 14,
+                vertical: 14,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FB),
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(
-                  color: const Color(0xFFE0E4EA),
-                ),
+                color: p.surfaceAlt,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: p.border),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       formatDate(date),
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: date == null
-                            ? Colors.grey
-                            : navy,
+                      style: ts(
+                        context,
+                        12,
+                        sub: date == null,
                       ),
                     ),
                   ),
 
-                  const Icon(
+                  Icon(
                     Icons.calendar_month,
                     size: 17,
-                    color: Colors.grey,
+                    color: p.textSub,
                   ),
                 ],
               ),
@@ -785,6 +750,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     bool? value,
     ValueChanged<bool?> onChanged,
   ) {
+    final p = context.pal;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Column(
@@ -801,7 +768,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                   onChanged: onChanged,
                   contentPadding: EdgeInsets.zero,
                   dense: true,
-                  activeColor: navy,
+                  activeColor: p.accent,
                   title: _text('Yes', size: 11),
                 ),
               ),
@@ -813,7 +780,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                   onChanged: onChanged,
                   contentPadding: EdgeInsets.zero,
                   dense: true,
-                  activeColor: navy,
+                  activeColor: p.accent,
                   title: _text('No', size: 11),
                 ),
               ),
@@ -857,12 +824,15 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     bool value,
     ValueChanged<bool?> onChanged,
   ) {
+    final p = context.pal;
+
     return CheckboxListTile(
       value: value,
       onChanged: onChanged,
       contentPadding: EdgeInsets.zero,
       dense: true,
-      activeColor: navy,
+      activeColor: p.accent,
+      checkColor: p.onAccent,
       controlAffinity: ListTileControlAffinity.leading,
       title: _text(label, size: 11),
     );
@@ -879,16 +849,12 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   Widget _text(
     String value, {
     double size = 12,
-    Color color = navy,
+    bool sub = false,
     FontWeight weight = FontWeight.w400,
   }) {
     return Text(
       value,
-      style: GoogleFonts.poppins(
-        fontSize: size,
-        color: color,
-        fontWeight: weight,
-      ),
+      style: ts(context, size, weight: weight, sub: sub),
     );
   }
 }

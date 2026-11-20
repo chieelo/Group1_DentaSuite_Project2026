@@ -48,11 +48,27 @@ class _PatientsScreenState extends State<PatientsScreen> {
     super.dispose();
   }
 
+  Future<void> _addPatient() async {
+    final newPatient = await Navigator.push<Map<String, String>>(
+      context,
+      MaterialPageRoute(builder: (_) => const AddPatientScreen()),
+    );
+
+    if (newPatient != null) {
+      setState(() {
+        newPatient['id'] =
+            'PAT-${(patients.length + 1).toString().padLeft(4, '0')}';
+        patients.add(newPatient);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filteredPatients = patients.where((patient) {
-      final query = searchController.text.toLowerCase();
+    final p = context.pal;
+    final query = searchController.text.toLowerCase();
 
+    final filteredPatients = patients.where((patient) {
       return patient['name']!.toLowerCase().contains(query) ||
           patient['id']!.toLowerCase().contains(query);
     }).toList();
@@ -65,116 +81,93 @@ class _PatientsScreenState extends State<PatientsScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      'Patient Directory',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 17,
-                        color: navy,
-                      ),
-                    ),
-                  ),
+                  Expanded(child: sectionTitle('Patient Directory')),
                   ElevatedButton.icon(
-                    onPressed: () async {
-                      final newPatient =
-                          await Navigator.push<Map<String, String>>(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddPatientScreen(),
-                            ),
-                          );
-
-                      if (newPatient != null) {
-                        setState(() {
-                          newPatient['id'] =
-                              'PAT-${(patients.length + 1).toString().padLeft(4, '0')}';
-                          patients.add(newPatient);
-                        });
-                      }
-                    },
+                    onPressed: _addPatient,
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(
                       'Add',
-                      style: GoogleFonts.poppins(fontSize: 12),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: navy,
-                      foregroundColor: Colors.white,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 15),
-
               TextField(
                 controller: searchController,
                 onChanged: (_) => setState(() {}),
+                style: ts(context, 13),
+                cursorColor: p.accent,
                 decoration: InputDecoration(
                   hintText: 'Search patient name or ID...',
-                  hintStyle: GoogleFonts.poppins(fontSize: 12),
+                  fillColor: p.surface,
                   prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
                 ),
               ),
             ],
           ),
         ),
-
         Expanded(
           child: filteredPatients.isEmpty
               ? emptyMessage('No matching patients found.')
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   itemCount: filteredPatients.length,
                   itemBuilder: (context, index) {
                     final patient = filteredPatients[index];
 
-                    return Card(
-                      color: Colors.white,
-                      elevation: 0,
+                    return appCard(
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(13),
-                        side: const BorderSide(color: Color(0xFFE8EBF0)),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: const CircleAvatar(
-                          backgroundColor: Color(0xFFEAF0F8),
-                          child: Icon(Icons.person, color: navy),
-                        ),
-                        title: Text(
-                          patient['name']!,
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                      padding: const EdgeInsets.all(14),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                PatientDetailsScreen(patient: patient),
                           ),
-                        ),
-                        subtitle: Text(
-                          '${patient['id']}\n${patient['phone']}',
-                          style: GoogleFonts.poppins(fontSize: 10),
-                        ),
-                        isThreeLine: true,
-                        trailing: const Icon(
-                          Icons.chevron_right,
-                          color: Colors.grey,
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  PatientDetailsScreen(patient: patient),
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          gradientAvatar(patient['name']!, size: 44),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  patient['name']!,
+                                  style: ts(context, 13,
+                                      weight: FontWeight.w600),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  patient['id']!,
+                                  style: ts(context, 11, sub: true),
+                                ),
+                                Text(
+                                  patient['phone']!,
+                                  style: ts(context, 11, sub: true),
+                                ),
+                              ],
                             ),
-                          );
-                        },
+                          ),
+                          if ((patient['gender'] ?? '').isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: statusChip(
+                                context,
+                                patient['gender']!,
+                                genderColor(patient['gender']!),
+                              ),
+                            ),
+                          Icon(Icons.chevron_right_rounded,
+                              color: p.textSub),
+                        ],
                       ),
                     );
                   },

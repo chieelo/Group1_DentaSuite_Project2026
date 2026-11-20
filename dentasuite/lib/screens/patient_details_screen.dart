@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -13,27 +12,38 @@ class PatientDetailsScreen extends StatelessWidget {
     required this.patient,
   });
 
+  String _value(String key) {
+    final v = patient[key];
+    return (v == null || v.trim().isEmpty) ? 'Not provided' : v;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final p = context.pal;
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        backgroundColor: background,
+        backgroundColor: p.bg,
         appBar: AppBar(
-          backgroundColor: navy,
+          backgroundColor: p.isDark ? p.surface : navy,
           foregroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.white),
           title: Text(
             'Patient Details',
             style: GoogleFonts.poppins(
               fontSize: 17,
               fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
           bottom: TabBar(
             isScrollable: true,
+            tabAlignment: TabAlignment.start,
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
+            dividerColor: Colors.transparent,
             labelStyle: GoogleFonts.poppins(fontSize: 11),
             tabs: const [
               Tab(text: 'Personal Info'),
@@ -46,26 +56,30 @@ class PatientDetailsScreen extends StatelessWidget {
         body: TabBarView(
           children: [
             _detailsContent([
-              _info('Patient Name', patient['name']!),
-              _info('Patient ID', patient['id']!),
-              _info('Contact Number', patient['phone']!),
-              _info('Gender', patient['gender']!),
-              _info('Email Address', 'Not provided'),
-              _info('Address', 'Not provided'),
+              _info(context, 'Patient Name', _value('name')),
+              _info(context, 'Patient ID', _value('id')),
+              _info(context, 'Contact Number', _value('phone')),
+              _info(context, 'Gender', _value('gender')),
+              _info(context, 'Email Address', _value('email')),
+              _info(context, 'Address', _value('address')),
             ]),
 
             _detailsContent([
-              _info('Known Allergies', 'No information recorded'),
-              _info('Existing Conditions', 'No information recorded'),
-              _info('Current Medications', 'No information recorded'),
-              _info('Previous Surgeries', 'No information recorded'),
-              _info('Medical Notes', 'No information recorded'),
+              _info(context, 'Known Allergies', 'No information recorded'),
+              _info(context, 'Existing Conditions',
+                  'No information recorded'),
+              _info(context, 'Current Medications',
+                  'No information recorded'),
+              _info(context, 'Previous Surgeries',
+                  'No information recorded'),
+              _info(context, 'Medical Notes', 'No information recorded'),
             ]),
 
             const ToothChartScreen(),
 
             _detailsContent([
               _info(
+                context,
                 'Treatment History',
                 'No treatments recorded yet',
               ),
@@ -83,32 +97,18 @@ class PatientDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _info(String label, String value) {
-    return Container(
+  Widget _info(BuildContext context, String label, String value) {
+    return appCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              color: Colors.grey,
-            ),
-          ),
+          Text(label, style: ts(context, 11, sub: true)),
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: navy,
-            ),
+            style: ts(context, 13, weight: FontWeight.w600),
           ),
         ],
       ),
