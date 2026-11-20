@@ -1,5 +1,5 @@
+
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,7 +17,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool showPassword = false;
 
-  static const Color navy = Color(0xFF202D4E);
+  static const Color navy = Color(0xFF0D203B);
+  static const Color mint = Color(0xFFC2FFE1);
   static const Color gray = Color(0xFF85898D);
 
   static const double designWidth = 928;
@@ -34,25 +35,24 @@ class _LoginScreenState extends State<LoginScreen> {
     required bool hasText,
   }) {
     if (hasText) {
-      // Underline appearance when user enters information
       return const InputDecoration(
         filled: false,
         contentPadding: EdgeInsets.only(bottom: 8),
         border: UnderlineInputBorder(
           borderSide: BorderSide(
-            color: Color(0xFF174B88),
+            color: navy,
             width: 2,
           ),
         ),
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(
-            color: Color(0xFF174B88),
+            color: navy,
             width: 2,
           ),
         ),
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(
-            color: Color(0xFF174B88),
+            color: navy,
             width: 2,
           ),
         ),
@@ -98,25 +98,21 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/login_light_background.png',
+              'assets/images/login_light_background.png',
               fit: BoxFit.cover,
             ),
           ),
 
           Positioned.fill(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Center(
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox(
-                      width: designWidth,
-                      height: designHeight,
-                      child: _buildLoginDesign(),
-                    ),
-                  ),
-                );
-              },
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: designWidth,
+                  height: designHeight,
+                  child: _buildLoginDesign(),
+                ),
+              ),
             ),
           ),
         ],
@@ -133,7 +129,9 @@ class _LoginScreenState extends State<LoginScreen> {
           width: 550,
           height: 350,
           child: Image.asset(
-            'assets/dentasuite_logo.png',
+            Theme.of(context).brightness == Brightness.dark
+                ? 'assets/images/logo_isDark.png'
+                : 'assets/images/logo_islight.png',
             fit: BoxFit.contain,
           ),
         ),
@@ -142,10 +140,10 @@ class _LoginScreenState extends State<LoginScreen> {
           top: 690,
           left: 0,
           right: 0,
-          child: Text(
+          child: const Text(
             'Sign in to DentaSuite',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
+            style: TextStyle(
               fontSize: 57,
               fontWeight: FontWeight.w700,
               color: navy,
@@ -157,10 +155,10 @@ class _LoginScreenState extends State<LoginScreen> {
           top: 780,
           left: 0,
           right: 0,
-          child: Text(
+          child: const Text(
             'Enter your details below.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
+            style: TextStyle(
               fontSize: 35,
               color: gray,
             ),
@@ -180,9 +178,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               TextField(
                 controller: usernameController,
-                style: GoogleFonts.poppins(
+                style: const TextStyle(
                   fontSize: 35,
-                  color: gray,
+                  color: navy,
                 ),
                 onChanged: (value) {
                   setState(() {});
@@ -203,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextField(
                   controller: passwordController,
                   obscureText: !showPassword,
-                  style: GoogleFonts.poppins(
+                  style: const TextStyle(
                     fontSize: 30,
                     color: navy,
                   ),
@@ -240,10 +238,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                     ),
+
                     const SizedBox(width: 10),
-                    Text(
+
+                    const Text(
                       'Show Password',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 27,
                         color: gray,
                       ),
@@ -260,14 +260,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 92,
                   child: OutlinedButton(
                     onPressed: () {
-                      // Connect authentication here.
+                      Navigator.pushReplacementNamed(
+                        context,
+                        '/home',
+                      );
                     },
                     style: OutlinedButton.styleFrom(
                       backgroundColor: navy,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.all(5),
                       side: const BorderSide(
-                        color: Color(0xFF174B88),
+                        color: mint,
                         width: 3,
                       ),
                       shape: RoundedRectangleBorder(
@@ -285,9 +288,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         borderRadius: BorderRadius.circular(9),
                       ),
-                      child: Text(
+                      child: const Text(
                         'LOG IN',
-                        style: GoogleFonts.poppins(
+                        style: TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -307,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: GoogleFonts.poppins(
+      style: const TextStyle(
         fontSize: 36,
         fontWeight: FontWeight.w700,
         color: navy,
