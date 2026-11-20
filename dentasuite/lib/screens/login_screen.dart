@@ -1,5 +1,7 @@
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
       TextEditingController();
 
   bool showPassword = false;
+  bool isLoading = false;
 
   static const Color navy = Color(0xFF0D203B);
   static const Color mint = Color(0xFFC2FFE1);
@@ -24,12 +27,102 @@ class _LoginScreenState extends State<LoginScreen> {
   static const double designWidth = 928;
   static const double designHeight = 1648;
 
+  static const String loginUrl =
+      'https://3c64tbzmtd.execute-api.ap-southeast-2.amazonaws.com/dev/login';
+
   @override
   void dispose() {
     usernameController.dispose();
     passwordController.dispose();
     super.dispose();
   }
+
+ 
+Future<void> _login() async {
+  final username = usernameController.text.trim();
+  final password = passwordController.text;
+
+  if (username.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please enter your username and password.'),
+      ),
+    );
+    return;
+  }
+
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    final requestBody = {
+    'a_username': username,
+    'a_password': password,
+    };
+    
+
+
+    final response = await http.post(
+      Uri.parse(loginUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    debugPrint('========== LOGIN RESPONSE ==========');
+    debugPrint('Status: ${response.statusCode}');
+    debugPrint('Response: ${response.body}');
+
+    if (!mounted) return;
+
+    Map<String, dynamic> responseData = {};
+
+    try {
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is Map<String, dynamic>) {
+        responseData = decoded;
+      }
+    } catch (_) {
+      debugPrint('Response is not valid JSON.');
+    }
+
+    if (response.statusCode == 200) {
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            responseData['message']?.toString() ??
+                'Login failed. Status: ${response.statusCode}',
+          ),
+        ),
+      );
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    debugPrint('Login Error: $e');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Unable to connect to the server. Please try again.',
+        ),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+}
+
 
   InputDecoration _buildFieldDecoration({
     required bool hasText,
@@ -259,12 +352,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 434,
                   height: 92,
                   child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/home',
-                      );
-                    },
+                    onPressed: isLoading ? null : _login,
                     style: OutlinedButton.styleFrom(
                       backgroundColor: navy,
                       foregroundColor: Colors.white,
@@ -288,14 +376,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         borderRadius: BorderRadius.circular(9),
                       ),
-                      child: const Text(
-                        'LOG IN',
-                        style: TextStyle(
-                          fontSize: 34,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: isLoading
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                          : const Text(
+                              'LOG IN',
+                              style: TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ),
