@@ -105,6 +105,11 @@
       ]
     },
     {
+      "name": "vector_math",
+      "version": "2.4.4",
+      "dependencies": []
+    },
+    {
       "name": "stack_trace",
       "version": "1.12.2",
       "dependencies": [
@@ -512,11 +517,6 @@
         "meta",
         "pub_semver"
       ]
-    },
-    {
-      "name": "vector_math",
-      "version": "2.4.4",
-      "dependencies": []
     }
   ],
   "configVersion": 1

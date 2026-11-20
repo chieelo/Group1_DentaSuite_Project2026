@@ -1,8 +1,8 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Mercado_Flutter\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Group1_DentaSuite_Project2026\Group1_DentaSuite_Project2026\dentasuite"
-export "FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=C:\Group1_DentaSuite_Project2026\Group1_DentaSuite_Project2026\dentasuite\macos\Flutter\ephemeral\Packages\.packages\FlutterFramework"
+export "FLUTTER_ROOT=C:\flutter"
+export "FLUTTER_APPLICATION_PATH=C:\MobileProg\DentaSuite\Group1_DentaSuite_Project2026\dentasuite"
+export "FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=C:\MobileProg\DentaSuite\Group1_DentaSuite_Project2026\dentasuite\macos\Flutter\ephemeral\Packages\.packages\FlutterFramework"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"
