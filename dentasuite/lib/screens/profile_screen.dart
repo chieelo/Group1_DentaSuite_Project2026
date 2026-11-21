@@ -1,14 +1,18 @@
 
 import 'package:flutter/material.dart';
 
+import '../model/user.dart';
+
 class ProfileScreen extends StatelessWidget {
   final bool isDarkMode;
   final ValueChanged<bool> onThemeChanged;
+  final AppUser user;
 
   const ProfileScreen({
     super.key,
     required this.isDarkMode,
     required this.onThemeChanged,
+    required this.user,
   });
 
   static const Color mint = Color(0xFFC2FFE1);
@@ -39,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 15),
 
         Text(
-          'Admin User',
+          user.fullName,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 19,
@@ -48,8 +52,10 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
 
+        const SizedBox(height: 4),
+
         Text(
-          'admin@dentasuite.com',
+          user.email,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 12,
@@ -57,21 +63,32 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
+
+        Text(
+          '@${user.username}',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+
+        const SizedBox(height: 12),
 
         Center(
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 15,
-              vertical: 5,
+              vertical: 6,
             ),
             decoration: BoxDecoration(
               color: mint,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text(
-              'ADMINISTRATOR',
-              style: TextStyle(
+            child: Text(
+              user.role,
+              style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
                 color: navy,
@@ -83,41 +100,48 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 30),
 
         _sectionTitle(context, 'Account Settings'),
+
         const SizedBox(height: 12),
 
         _profileOption(
           context,
           Icons.person_outline,
           'Personal Information',
+          onTap: () {},
         ),
 
         _profileOption(
           context,
           Icons.lock_outline,
           'Change Password',
+          onTap: () {},
         ),
 
         _profileOption(
           context,
           Icons.settings_outlined,
           'Application Settings',
+          onTap: () {},
         ),
 
         _profileOption(
           context,
           Icons.help_outline,
           'Help and Support',
+          onTap: () {},
         ),
 
         _profileOption(
           context,
           Icons.info_outline,
           'About DentaSuite',
+          onTap: () {},
         ),
 
         const SizedBox(height: 25),
 
         _sectionTitle(context, 'Appearance'),
+
         const SizedBox(height: 12),
 
         Container(
@@ -193,7 +217,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionTitle(BuildContext context, String title) {
+  Widget _sectionTitle(
+    BuildContext context,
+    String title,
+  ) {
     final theme = Theme.of(context);
 
     return Text(
@@ -209,8 +236,9 @@ class ProfileScreen extends StatelessWidget {
   Widget _profileOption(
     BuildContext context,
     IconData icon,
-    String title,
-  ) {
+    String title, {
+    required VoidCallback onTap,
+  }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -239,7 +267,7 @@ class ProfileScreen extends StatelessWidget {
           Icons.chevron_right,
           color: theme.colorScheme.onSurfaceVariant,
         ),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }

@@ -1,10 +1,17 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../model/user.dart';
 import '../widgets/shared_widgets.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  final AppUser user;
+
+  const DashboardScreen({
+    super.key,
+    required this.user,
+  });
 
   String _greeting() {
     final h = DateTime.now().hour;
@@ -14,23 +21,53 @@ class DashboardScreen extends StatelessWidget {
   }
 
   String _dateLabel() {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const days = [
+      'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+    ];
+
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
+
     final n = DateTime.now();
+
     return '${days[n.weekday - 1]}, ${months[n.month - 1]} ${n.day}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final p = context.pal;
+
+    final quickActions = <Widget>[
+      _quickAction(
+        context,
+        Icons.person_add_alt_1_rounded,
+        'New Patient',
+        const Color(0xFF3B82F6),
+      ),
+      if (!user.isAssistant)
+        _quickAction(
+          context,
+          Icons.add_chart_rounded,
+          'Treatment',
+          const Color(0xFF10B981),
+        ),
+      if (user.isDentist)
+        _quickAction(
+          context,
+          Icons.post_add_rounded,
+          'Certificate',
+          const Color(0xFFF59E0B),
+        ),
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _hero(),
+          _hero(context),
 
           const SizedBox(height: 24),
 
@@ -78,27 +115,15 @@ class DashboardScreen extends StatelessWidget {
             'Quick Actions',
             subtitle: 'Frequently used clinic functions',
           ),
+
           const SizedBox(height: 12),
 
           Row(
             children: [
-              _quickAction(
-                Icons.person_add_alt_1_rounded,
-                'New Patient',
-                const Color(0xFF3B82F6),
-              ),
-              const SizedBox(width: 10),
-              _quickAction(
-                Icons.add_chart_rounded,
-                'Treatment',
-                const Color(0xFF10B981),
-              ),
-              const SizedBox(width: 10),
-              _quickAction(
-                Icons.post_add_rounded,
-                'Certificate',
-                const Color(0xFFF59E0B),
-              ),
+              for (int i = 0; i < quickActions.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                quickActions[i],
+              ],
             ],
           ),
 
@@ -107,47 +132,41 @@ class DashboardScreen extends StatelessWidget {
           sectionTitle('Recent Activities'),
           const SizedBox(height: 12),
 
-          Builder(
-            builder: (context) {
-              final p = context.pal;
-
-              return appCard(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
+          appCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
+            child: Column(
+              children: [
+                _activity(
+                  context,
+                  'New patient registered',
+                  'Maria Santos',
+                  'Today',
+                  Icons.person_add_alt_1_rounded,
+                  const Color(0xFF3B82F6),
                 ),
-                child: Column(
-                  children: [
-                    _activity(
-                      context,
-                      'New patient registered',
-                      'Maria Santos',
-                      'Today',
-                      Icons.person_add_alt_1_rounded,
-                      const Color(0xFF3B82F6),
-                    ),
-                    Divider(height: 1, color: p.border),
-                    _activity(
-                      context,
-                      'Treatment recorded',
-                      'Juan Dela Cruz',
-                      'Today',
-                      Icons.medical_services_rounded,
-                      const Color(0xFF10B981),
-                    ),
-                    Divider(height: 1, color: p.border),
-                    _activity(
-                      context,
-                      'Certificate generated',
-                      'Ana Reyes',
-                      'Yesterday',
-                      Icons.description_rounded,
-                      const Color(0xFFF59E0B),
-                    ),
-                  ],
+                Divider(height: 1, color: p.border),
+                _activity(
+                  context,
+                  'Treatment recorded',
+                  'Juan Dela Cruz',
+                  'Today',
+                  Icons.medical_services_rounded,
+                  const Color(0xFF10B981),
                 ),
-              );
-            },
+                Divider(height: 1, color: p.border),
+                _activity(
+                  context,
+                  'Certificate generated',
+                  'Ana Reyes',
+                  'Yesterday',
+                  Icons.description_rounded,
+                  const Color(0xFFF59E0B),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -165,11 +184,27 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _hero() {
+  Widget _hero(BuildContext context) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
+    final firstName = user.firstName.trim().isEmpty
+        ? user.role
+        : user.firstName;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: heroGradient,
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [
+                  Color(0xFF18344F),
+                  Color(0xFF0D203B),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : heroGradient,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
@@ -183,8 +218,16 @@ class DashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         child: Stack(
           children: [
-            Positioned(right: -28, top: -28, child: _circle(120, 0.07)),
-            Positioned(right: 44, bottom: -46, child: _circle(100, 0.05)),
+            Positioned(
+              right: -28,
+              top: -28,
+              child: _circle(120, 0.07),
+            ),
+            Positioned(
+              right: 44,
+              bottom: -46,
+              child: _circle(100, 0.05),
+            ),
             Padding(
               padding: const EdgeInsets.all(22),
               child: Row(
@@ -199,7 +242,9 @@ class DashboardScreen extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.14),
+                            color: Colors.white.withValues(
+                              alpha: 0.14,
+                            ),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -222,7 +267,9 @@ class DashboardScreen extends StatelessWidget {
                             ],
                           ),
                         ),
+
                         const SizedBox(height: 16),
+
                         Text(
                           '${_greeting()},',
                           style: GoogleFonts.poppins(
@@ -230,8 +277,9 @@ class DashboardScreen extends StatelessWidget {
                             color: Colors.white70,
                           ),
                         ),
+
                         Text(
-                          'Admin!',
+                          '$firstName!',
                           style: GoogleFonts.poppins(
                             fontSize: 27,
                             fontWeight: FontWeight.w700,
@@ -239,7 +287,9 @@ class DashboardScreen extends StatelessWidget {
                             height: 1.2,
                           ),
                         ),
+
                         const SizedBox(height: 4),
+
                         Text(
                           'Welcome back to DentaSuite.',
                           style: GoogleFonts.poppins(
@@ -250,6 +300,7 @@ class DashboardScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+
                   Container(
                     width: 58,
                     height: 58,
@@ -272,28 +323,38 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _quickAction(IconData icon, String label, Color color) {
+  Widget _quickAction(
+    BuildContext context,
+    IconData icon,
+    String label,
+    Color color,
+  ) {
     return Expanded(
-      child: Builder(
-        builder: (context) {
-          return appCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 6,
+      child: appCard(
+        padding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 6,
+        ),
+        child: Column(
+          children: [
+            iconBubble(
+              icon,
+              color,
+              size: 46,
+              iconSize: 24,
             ),
-            child: Column(
-              children: [
-                iconBubble(icon, color, size: 46, iconSize: 24),
-                const SizedBox(height: 10),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: ts(context, 11, weight: FontWeight.w600),
-                ),
-              ],
+            const SizedBox(height: 10),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: ts(
+                context,
+                11,
+                weight: FontWeight.w600,
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -310,7 +371,12 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          iconBubble(icon, color, size: 40, iconSize: 20),
+          iconBubble(
+            icon,
+            color,
+            size: 40,
+            iconSize: 20,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -318,13 +384,23 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: ts(context, 12, weight: FontWeight.w600),
+                  style: ts(
+                    context,
+                    12,
+                    weight: FontWeight.w600,
+                  ),
                 ),
-                Text(name, style: ts(context, 11, sub: true)),
+                Text(
+                  name,
+                  style: ts(context, 11, sub: true),
+                ),
               ],
             ),
           ),
-          Text(date, style: ts(context, 10, sub: true)),
+          Text(
+            date,
+            style: ts(context, 10, sub: true),
+          ),
         ],
       ),
     );

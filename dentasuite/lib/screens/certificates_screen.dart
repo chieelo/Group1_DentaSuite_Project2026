@@ -18,7 +18,7 @@ class CertificatesScreen extends StatelessWidget {
 
         const SizedBox(height: 20),
 
-        // Hero card: gradient + white text is readable in both modes.
+      
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(

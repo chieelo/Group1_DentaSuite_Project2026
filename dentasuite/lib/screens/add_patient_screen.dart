@@ -158,8 +158,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     return Scaffold(
       backgroundColor: p.bg,
       appBar: AppBar(
-        // Navy in light mode, card color in dark mode.
-        // Title and back arrow are ALWAYS white so they are always visible.
         backgroundColor: p.isDark ? p.surface : navy,
         foregroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -503,7 +501,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     });
   }
 
-  // ───────────────────────── UI helpers ─────────────────────────
 
   Widget _sectionHeader(IconData icon, String title) {
     return Container(
@@ -513,7 +510,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         vertical: 13,
       ),
       decoration: BoxDecoration(
-        gradient: heroGradient, // white text is readable in both modes
+        gradient: heroGradient, 
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -625,8 +622,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
           const SizedBox(height: 6),
 
-          // Fill color, borders and hint color come from the global
-          // inputDecorationTheme in main.dart (works in light + dark).
+
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,

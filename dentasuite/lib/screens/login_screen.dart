@@ -1,15 +1,24 @@
 
 import 'dart:convert';
+import 'package:dentasuite/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../model/user.dart';
+
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+    required this.isDarkMode,
+    required this.onThemeChanged,
+  });
+
+  final bool isDarkMode;
+  final ValueChanged<bool> onThemeChanged;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
-
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController usernameController =
       TextEditingController();
@@ -58,88 +67,123 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _login() async {
-    final username = usernameController.text.trim();
-    final password = passwordController.text;
+Future<void> _login() async {
+  final username = usernameController.text.trim();
+  final password = passwordController.text;
 
-    if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your username and password.'),
-        ),
-      );
-      return;
-    }
+  if (username.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please enter your username and password.'),
+      ),
+    );
+    return;
+  }
 
-    setState(() {
-      isLoading = true;
-    });
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    final requestBody = {
+      'a_username': username,
+      'a_password': password,
+    };
+
+    final response = await http.post(
+      Uri.parse(loginUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    if (!mounted) return;
+
+    Map<String, dynamic> responseData = {};
 
     try {
-      final requestBody = {
-        'a_username': username,
-        'a_password': password,
-      };
+      final decoded = jsonDecode(response.body);
 
-      final response = await http.post(
-        Uri.parse(loginUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(requestBody),
-      );
-
-      // debugPrint('========== LOGIN RESPONSE ==========');
-      // debugPrint('Status: ${response.statusCode}');
-      // debugPrint('Response: ${response.body}');
-
-      if (!mounted) return;
-
-      Map<String, dynamic> responseData = {};
-
-      try {
-        final decoded = jsonDecode(response.body);
-
-        if (decoded is Map<String, dynamic>) {
-          responseData = decoded;
-        }
-      } catch (_) {
-        debugPrint('Response is not valid JSON.');
+      if (decoded is Map<String, dynamic>) {
+        responseData = decoded;
       }
+    } catch (_) {
+      debugPrint('Response is not valid JSON.');
+    }
 
-      if (response.statusCode == 200) {
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
+    if (response.statusCode == 200) {
+      debugPrint('LOGIN RESPONSE: ${response.body}');
+
+      final userData = responseData['user'] ??
+          responseData['data'] ??
+          responseData;
+
+      if (userData is! Map<String, dynamic> ||
+          userData['a_id'] == null ||
+          userData['a_userlvl'] == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(
-              responseData['message']?.toString() ??
-                  'Login failed. Status: ${response.statusCode}',
+              'Login succeeded, but the server did not return valid user information.',
             ),
           ),
         );
+        return;
       }
-    } catch (e) {
-      if (!mounted) return;
 
-      debugPrint('Login Error: $e');
+      final loginUser = AppUser.fromJson(userData);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Unable to connect to the server. Please try again.',
+      if (loginUser.userLevel < 0 || loginUser.userLevel > 2) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your account has an invalid user role.'),
+          ),
+        );
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DentaSuiteHomeScreen(
+            isDarkMode: widget.isDarkMode,
+            onThemeChanged: widget.onThemeChanged,
+            user: loginUser,
           ),
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            responseData['message']?.toString() ??
+                'Login failed. Status: ${response.statusCode}',
+          ),
+        ),
+      );
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    debugPrint('Login Error: $e');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Unable to connect to the server. Please try again.',
+        ),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
+}
 
   InputDecoration _buildFieldDecoration() {
     return InputDecoration(

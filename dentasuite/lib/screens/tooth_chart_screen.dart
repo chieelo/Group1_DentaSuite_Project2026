@@ -56,7 +56,7 @@ class ToothChartScreen extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(6),
               onTap: () {
-                // Tooth selection can be implemented here.
+               
               },
               child: Container(
                 height: 43,

@@ -1,22 +1,27 @@
+
 import 'package:dentasuite/widgets/app_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../model/user.dart';
 import '../widgets/shared_widgets.dart';
 import 'dashboard_screen.dart';
 import 'patients_screen.dart';
 import 'treatments_screen.dart';
 import 'certificates_screen.dart';
+import 'accounts_screen.dart';
 import 'profile_screen.dart';
 
 class DentaSuiteHomeScreen extends StatefulWidget {
   final bool isDarkMode;
   final ValueChanged<bool> onThemeChanged;
+  final AppUser user;
 
   const DentaSuiteHomeScreen({
     super.key,
     required this.isDarkMode,
     required this.onThemeChanged,
+    required this.user,
   });
 
   @override
@@ -24,56 +29,89 @@ class DentaSuiteHomeScreen extends StatefulWidget {
       _DentaSuiteHomeScreenState();
 }
 
-class _DentaSuiteHomeScreenState extends State<DentaSuiteHomeScreen> {
+class NavItem {
+  final String label;
+  final IconData icon;
+  final IconData selectedIcon;
+  final Widget page;
+
+  const NavItem({
+    required this.label,
+    required this.icon,
+    required this.selectedIcon,
+    required this.page,
+  });
+}
+
+class _DentaSuiteHomeScreenState
+    extends State<DentaSuiteHomeScreen> {
   int selectedIndex = 0;
 
-  static const List<String> navLabels = [
-    'Home',
-    'Patients',
-    'Treatments',
-    'Certificates',
-    'Profile',
-  ];
+  List<NavItem> get navigationItems {
+    final user = widget.user;
 
-  static const List<IconData> icons = [
-    Icons.dashboard_outlined,
-    Icons.people_alt_outlined,
-    Icons.medical_services_outlined,
-    Icons.description_outlined,
-    Icons.person_outline_rounded,
-  ];
-
-  static const List<IconData> selectedIcons = [
-    Icons.dashboard_rounded,
-    Icons.people_alt_rounded,
-    Icons.medical_services_rounded,
-    Icons.description_rounded,
-    Icons.person_rounded,
-  ];
+    return [
+      NavItem(
+        label: 'Home',
+        icon: Icons.dashboard_outlined,
+        selectedIcon: Icons.dashboard_rounded,
+        page: DashboardScreen(user: user),
+      ),
+      NavItem(
+        label: 'Patients',
+        icon: Icons.people_alt_outlined,
+        selectedIcon: Icons.people_alt_rounded,
+        page: const PatientsScreen(),
+      ),
+      NavItem(
+        label: 'Treatments',
+        icon: Icons.medical_services_outlined,
+        selectedIcon: Icons.medical_services_rounded,
+        page: const TreatmentsScreen(),
+      ),
+      if (user.isDentist)
+        NavItem(
+          label: 'Certificates',
+          icon: Icons.description_outlined,
+          selectedIcon: Icons.description_rounded,
+          page: const CertificatesScreen(),
+        ),
+      if (user.isAdmin)
+        NavItem(
+          label: 'Accounts',
+          icon: Icons.manage_accounts_outlined,
+          selectedIcon: Icons.manage_accounts_rounded,
+          page: const AccountsScreen(),
+        ),
+      NavItem(
+        label: 'Profile',
+        icon: Icons.person_outline_rounded,
+        selectedIcon: Icons.person_rounded,
+        page: ProfileScreen(
+          user: user,
+          isDarkMode: widget.isDarkMode,
+          onThemeChanged: widget.onThemeChanged,
+        ),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-
-    final List<Widget> pages = [
-      const DashboardScreen(),
-      const PatientsScreen(),
-      const TreatmentsScreen(),
-      const CertificatesScreen(),
-      ProfileScreen(
-        isDarkMode: widget.isDarkMode,
-        onThemeChanged: widget.onThemeChanged,
-      ),
-    ];
+    final items = navigationItems;
 
     return Scaffold(
       backgroundColor: p.bg,
-
       appBar: AppBar(
         backgroundColor: p.surface,
+        elevation: 0,
         title: Row(
           children: [
-            const AppLogo(width: 30, height: 30),
+            const AppLogo(
+              width: 30,
+              height: 30,
+            ),
             const SizedBox(width: 10),
             Text(
               'DentaSuite',
@@ -101,18 +139,23 @@ class _DentaSuiteHomeScreenState extends State<DentaSuiteHomeScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: p.border),
+          child: Divider(
+            height: 1,
+            color: p.border,
+          ),
         ),
       ),
 
       body: IndexedStack(
         index: selectedIndex,
-        children: pages,
+        children: items.map((item) => item.page).toList(),
       ),
 
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: p.border)),
+          border: Border(
+            top: BorderSide(color: p.border),
+          ),
         ),
         child: NavigationBar(
           selectedIndex: selectedIndex,
@@ -121,14 +164,13 @@ class _DentaSuiteHomeScreenState extends State<DentaSuiteHomeScreen> {
               selectedIndex = index;
             });
           },
-          destinations: List.generate(
-            navLabels.length,
-            (index) => NavigationDestination(
-              icon: Icon(icons[index]),
-              selectedIcon: Icon(selectedIcons[index]),
-              label: navLabels[index],
-            ),
-          ),
+          destinations: items.map((item) {
+            return NavigationDestination(
+              icon: Icon(item.icon),
+              selectedIcon: Icon(item.selectedIcon),
+              label: item.label,
+            );
+          }).toList(),
         ),
       ),
     );

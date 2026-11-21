@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
 import 'widgets/shared_widgets.dart';
 
 void main() {
@@ -29,6 +28,7 @@ class _DentaSuiteAppState extends State<DentaSuiteApp> {
   ThemeData _buildTheme(bool isDark) {
     final p = AppPalette(isDark);
     final brightness = isDark ? Brightness.dark : Brightness.light;
+
     final base = ThemeData(
       brightness: brightness,
       useMaterial3: true,
@@ -58,10 +58,10 @@ class _DentaSuiteAppState extends State<DentaSuiteApp> {
     );
 
     final textTheme = base.textTheme.apply(
-  fontFamily: GoogleFonts.poppins().fontFamily,
-  bodyColor: p.textMain,
-  displayColor: p.textMain,
-);
+      fontFamily: GoogleFonts.poppins().fontFamily,
+      bodyColor: p.textMain,
+      displayColor: p.textMain,
+    );
 
     OutlineInputBorder inputBorder(
       Color color, [
@@ -299,17 +299,12 @@ class _DentaSuiteAppState extends State<DentaSuiteApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'DentaSuite',
-
       theme: _buildTheme(false),
       darkTheme: _buildTheme(true),
       themeMode: _themeMode,
-
       initialRoute: '/',
-
       routes: {
-        '/': (context) => const LoginScreen(),
-
-        '/home': (context) => DentaSuiteHomeScreen(
+        '/': (context) => LoginScreen(
               isDarkMode: _themeMode == ThemeMode.dark,
               onThemeChanged: _changeTheme,
             ),
