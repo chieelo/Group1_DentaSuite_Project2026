@@ -30,6 +30,27 @@ class _LoginScreenState extends State<LoginScreen> {
   static const String loginUrl =
       'https://3c64tbzmtd.execute-api.ap-southeast-2.amazonaws.com/dev/login';
 
+  bool get isDark =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  Color get mainText =>
+      isDark ? const Color(0xFFEAF2FB) : navy;
+
+  Color get secondaryText =>
+      isDark ? const Color(0xFF9FB3C8) : gray;
+
+  Color get fieldBackground =>
+      isDark ? const Color(0xFF1B2F4B) : Colors.white;
+
+  Color get fieldBorder =>
+      isDark ? const Color(0xFF49617E) : const Color(0xFFCACDD0);
+
+  Color get buttonBackground =>
+      isDark ? mint : navy;
+
+  Color get buttonForeground =>
+      isDark ? navy : Colors.white;
+
   @override
   void dispose() {
     usernameController.dispose();
@@ -37,146 +58,115 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
- 
-Future<void> _login() async {
-  final username = usernameController.text.trim();
-  final password = passwordController.text;
+  Future<void> _login() async {
+    final username = usernameController.text.trim();
+    final password = passwordController.text;
 
-  if (username.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please enter your username and password.'),
-      ),
-    );
-    return;
-  }
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your username and password.'),
+        ),
+      );
+      return;
+    }
 
-  setState(() {
-    isLoading = true;
-  });
-
-  try {
-    final requestBody = {
-    'a_username': username,
-    'a_password': password,
-    };
-    
-
-
-    final response = await http.post(
-      Uri.parse(loginUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode(requestBody),
-    );
-
-    debugPrint('========== LOGIN RESPONSE ==========');
-    debugPrint('Status: ${response.statusCode}');
-    debugPrint('Response: ${response.body}');
-
-    if (!mounted) return;
-
-    Map<String, dynamic> responseData = {};
+    setState(() {
+      isLoading = true;
+    });
 
     try {
-      final decoded = jsonDecode(response.body);
+      final requestBody = {
+        'a_username': username,
+        'a_password': password,
+      };
 
-      if (decoded is Map<String, dynamic>) {
-        responseData = decoded;
+      final response = await http.post(
+        Uri.parse(loginUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      // debugPrint('========== LOGIN RESPONSE ==========');
+      // debugPrint('Status: ${response.statusCode}');
+      // debugPrint('Response: ${response.body}');
+
+      if (!mounted) return;
+
+      Map<String, dynamic> responseData = {};
+
+      try {
+        final decoded = jsonDecode(response.body);
+
+        if (decoded is Map<String, dynamic>) {
+          responseData = decoded;
+        }
+      } catch (_) {
+        debugPrint('Response is not valid JSON.');
       }
-    } catch (_) {
-      debugPrint('Response is not valid JSON.');
-    }
 
-    if (response.statusCode == 200) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
+      if (response.statusCode == 200) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              responseData['message']?.toString() ??
+                  'Login failed. Status: ${response.statusCode}',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      debugPrint('Login Error: $e');
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
-            responseData['message']?.toString() ??
-                'Login failed. Status: ${response.statusCode}',
+            'Unable to connect to the server. Please try again.',
           ),
         ),
       );
-    }
-  } catch (e) {
-    if (!mounted) return;
-
-    debugPrint('Login Error: $e');
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Unable to connect to the server. Please try again.',
-        ),
-      ),
-    );
-  } finally {
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
-}
 
-
-  InputDecoration _buildFieldDecoration({
-    required bool hasText,
-  }) {
-    if (hasText) {
-      return const InputDecoration(
-        filled: false,
-        contentPadding: EdgeInsets.only(bottom: 8),
-        border: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: navy,
-            width: 2,
-          ),
-        ),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: navy,
-            width: 2,
-          ),
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: navy,
-            width: 2,
-          ),
-        ),
-      );
-    }
-
+  InputDecoration _buildFieldDecoration() {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white.withOpacity(0.8),
+      fillColor: fieldBackground,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 14,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: Color(0xFFCACDD0),
+        borderSide: BorderSide(
+          color: fieldBorder,
           width: 2,
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: Color(0xFFCACDD0),
+        borderSide: BorderSide(
+          color: fieldBorder,
           width: 2,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: navy,
+        borderSide: BorderSide(
+          color: isDark ? mint : navy,
           width: 2,
         ),
       ),
@@ -186,16 +176,19 @@ Future<void> _login() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark
+          ? const Color(0xFF08111F)
+          : Colors.white,
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/images/login_light_background.png',
+              isDark
+                  ? 'assets/images/login_dark_background.png'
+                  : 'assets/images/login_light_background.png',
               fit: BoxFit.cover,
             ),
           ),
-
           Positioned.fill(
             child: Center(
               child: FittedBox(
@@ -222,7 +215,7 @@ Future<void> _login() async {
           width: 550,
           height: 350,
           child: Image.asset(
-            Theme.of(context).brightness == Brightness.dark
+            isDark
                 ? 'assets/images/logo_isDark.png'
                 : 'assets/images/logo_islight.png',
             fit: BoxFit.contain,
@@ -233,13 +226,13 @@ Future<void> _login() async {
           top: 690,
           left: 0,
           right: 0,
-          child: const Text(
+          child: Text(
             'Sign in to DentaSuite',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 57,
               fontWeight: FontWeight.w700,
-              color: navy,
+              color: mainText,
             ),
           ),
         ),
@@ -248,12 +241,12 @@ Future<void> _login() async {
           top: 780,
           left: 0,
           right: 0,
-          child: const Text(
+          child: Text(
             'Enter your details below.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 35,
-              color: gray,
+              color: secondaryText,
             ),
           ),
         ),
@@ -271,16 +264,15 @@ Future<void> _login() async {
 
               TextField(
                 controller: usernameController,
-                style: const TextStyle(
+                cursorColor: isDark ? mint : navy,
+                style: TextStyle(
                   fontSize: 35,
-                  color: navy,
+                  color: mainText,
                 ),
                 onChanged: (value) {
                   setState(() {});
                 },
-                decoration: _buildFieldDecoration(
-                  hasText: usernameController.text.isNotEmpty,
-                ),
+                decoration: _buildFieldDecoration(),
               ),
 
               const SizedBox(height: 42),
@@ -294,16 +286,15 @@ Future<void> _login() async {
                 child: TextField(
                   controller: passwordController,
                   obscureText: !showPassword,
-                  style: const TextStyle(
+                  cursorColor: isDark ? mint : navy,
+                  style: TextStyle(
                     fontSize: 30,
-                    color: navy,
+                    color: mainText,
                   ),
                   onChanged: (value) {
                     setState(() {});
                   },
-                  decoration: _buildFieldDecoration(
-                    hasText: passwordController.text.isNotEmpty,
-                  ),
+                  decoration: _buildFieldDecoration(),
                 ),
               ),
 
@@ -316,9 +307,12 @@ Future<void> _login() async {
                       height: 48,
                       child: Checkbox(
                         value: showPassword,
-                        activeColor: navy,
-                        side: const BorderSide(
-                          color: Color(0xFF999DA0),
+                        activeColor: isDark ? mint : navy,
+                        checkColor: navy,
+                        side: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF9FB3C8)
+                              : const Color(0xFF999DA0),
                           width: 2,
                         ),
                         shape: RoundedRectangleBorder(
@@ -334,11 +328,11 @@ Future<void> _login() async {
 
                     const SizedBox(width: 10),
 
-                    const Text(
+                    Text(
                       'Show Password',
                       style: TextStyle(
                         fontSize: 27,
-                        color: gray,
+                        color: secondaryText,
                       ),
                     ),
                   ],
@@ -354,11 +348,15 @@ Future<void> _login() async {
                   child: OutlinedButton(
                     onPressed: isLoading ? null : _login,
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: navy,
-                      foregroundColor: Colors.white,
+                      backgroundColor: buttonBackground,
+                      foregroundColor: buttonForeground,
+                      disabledBackgroundColor: isDark
+                          ? const Color(0xFF36516B)
+                          : const Color(0xFF64748B),
+                      disabledForegroundColor: Colors.white,
                       padding: const EdgeInsets.all(5),
-                      side: const BorderSide(
-                        color: mint,
+                      side: BorderSide(
+                        color: isDark ? navy : mint,
                         width: 3,
                       ),
                       shape: RoundedRectangleBorder(
@@ -371,21 +369,28 @@ Future<void> _login() async {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.white,
+                          color: isDark
+                              ? navy.withValues(alpha: 0.5)
+                              : Colors.white,
                           width: 1.5,
                         ),
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: isLoading
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
+                          ? SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: CircularProgressIndicator(
+                                color: buttonForeground,
+                                strokeWidth: 3,
+                              ),
                             )
-                          : const Text(
+                          : Text(
                               'LOG IN',
                               style: TextStyle(
                                 fontSize: 34,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                                color: buttonForeground,
                               ),
                             ),
                     ),
@@ -402,10 +407,10 @@ Future<void> _login() async {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 36,
         fontWeight: FontWeight.w700,
-        color: navy,
+        color: mainText,
       ),
     );
   }
