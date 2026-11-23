@@ -1,8 +1,9 @@
+
 import 'package:dentasuite/screens/add_patient_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'patient_details_screen.dart';
+import '../service/patient_service.dart';
 import '../widgets/shared_widgets.dart';
 
 class PatientsScreen extends StatefulWidget {
@@ -14,33 +15,15 @@ class PatientsScreen extends StatefulWidget {
 
 class _PatientsScreenState extends State<PatientsScreen> {
   final TextEditingController searchController = TextEditingController();
+  final PatientService patientService = PatientService();
 
-  final List<Map<String, String>> patients = [
-    {
-      'name': 'Maria Santos',
-      'id': 'PAT-0001',
-      'phone': '09171234567',
-      'gender': 'Female',
-    },
-    {
-      'name': 'Juan Dela Cruz',
-      'id': 'PAT-0002',
-      'phone': '09181234567',
-      'gender': 'Male',
-    },
-    {
-      'name': 'Ana Reyes',
-      'id': 'PAT-0003',
-      'phone': '09191234567',
-      'gender': 'Female',
-    },
-    {
-      'name': 'Pedro Garcia',
-      'id': 'PAT-0004',
-      'phone': '09201234567',
-      'gender': 'Male',
-    },
-  ];
+  late Future<List<Map<String, String>>> patientsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    patientsFuture = patientService.getPatients();
+  }
 
   @override
   void dispose() {
@@ -48,30 +31,30 @@ class _PatientsScreenState extends State<PatientsScreen> {
     super.dispose();
   }
 
+  void _loadPatients() {
+    setState(() {
+      patientsFuture = patientService.getPatients();
+    });
+  }
+
   Future<void> _addPatient() async {
     final newPatient = await Navigator.push<Map<String, String>>(
       context,
-      MaterialPageRoute(builder: (_) => const AddPatientScreen()),
+      MaterialPageRoute(
+        builder: (_) => const AddPatientScreen(),
+      ),
     );
 
+    if (!mounted) return;
+
     if (newPatient != null) {
-      setState(() {
-        newPatient['id'] =
-            'PAT-${(patients.length + 1).toString().padLeft(4, '0')}';
-        patients.add(newPatient);
-      });
+      _loadPatients();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    final query = searchController.text.toLowerCase();
-
-    final filteredPatients = patients.where((patient) {
-      return patient['name']!.toLowerCase().contains(query) ||
-          patient['id']!.toLowerCase().contains(query);
-    }).toList();
 
     return Column(
       children: [
@@ -81,7 +64,9 @@ class _PatientsScreenState extends State<PatientsScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(child: sectionTitle('Patient Directory')),
+                  Expanded(
+                    child: sectionTitle('Patient Directory'),
+                  ),
                   ElevatedButton.icon(
                     onPressed: _addPatient,
                     icon: const Icon(Icons.add, size: 18),
@@ -111,13 +96,87 @@ class _PatientsScreenState extends State<PatientsScreen> {
           ),
         ),
         Expanded(
-          child: filteredPatients.isEmpty
-              ? emptyMessage('No matching patients found.')
-              : ListView.builder(
+          child: FutureBuilder<List<Map<String, String>>>(
+            future: patientsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 40,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Unable to load patients.',
+                          style: ts(
+                            context,
+                            13,
+                            weight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          '${snapshot.error}',
+                          textAlign: TextAlign.center,
+                          style: ts(context, 11, sub: true),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: _loadPatients,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              final patients = snapshot.data ?? [];
+
+              final query = searchController.text.toLowerCase();
+
+              final filteredPatients = patients.where((patient) {
+                final name = (patient['name'] ?? '').toLowerCase();
+                final id = (patient['id'] ?? '').toLowerCase();
+
+                return name.contains(query) || id.contains(query);
+              }).toList();
+
+              if (filteredPatients.isEmpty) {
+                return emptyMessage(
+                  'No matching patients found.',
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  _loadPatients();
+                  await patientsFuture;
+                },
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   itemCount: filteredPatients.length,
                   itemBuilder: (context, index) {
                     final patient = filteredPatients[index];
+
+                    final name = patient['name'] ?? 'Unknown Patient';
+                    final id = patient['id'] ?? '';
+                    final phone = patient['phone'] ?? '';
+                    final gender = patient['gender'] ?? '';
 
                     return appCard(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -126,52 +185,61 @@ class _PatientsScreenState extends State<PatientsScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                PatientDetailsScreen(patient: patient),
+                            builder: (_) => PatientDetailsScreen(
+                              patient: patient,
+                            ),
                           ),
                         );
                       },
                       child: Row(
                         children: [
-                          gradientAvatar(patient['name']!, size: 44),
+                          gradientAvatar(name, size: 44),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  patient['name']!,
-                                  style: ts(context, 13,
-                                      weight: FontWeight.w600),
+                                  name,
+                                  style: ts(
+                                    context,
+                                    13,
+                                    weight: FontWeight.w600,
+                                  ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  patient['id']!,
+                                  'Patient ID: $id',
                                   style: ts(context, 11, sub: true),
                                 ),
                                 Text(
-                                  patient['phone']!,
+                                  phone,
                                   style: ts(context, 11, sub: true),
                                 ),
                               ],
                             ),
                           ),
-                          if ((patient['gender'] ?? '').isNotEmpty)
+                          if (gender.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(right: 6),
                               child: statusChip(
                                 context,
-                                patient['gender']!,
-                                genderColor(patient['gender']!),
+                                gender,
+                                genderColor(gender),
                               ),
                             ),
-                          Icon(Icons.chevron_right_rounded,
-                              color: p.textSub),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: p.textSub,
+                          ),
                         ],
                       ),
                     );
                   },
                 ),
+              );
+            },
+          ),
         ),
       ],
     );

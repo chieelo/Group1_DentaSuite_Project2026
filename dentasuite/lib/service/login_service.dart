@@ -1,17 +1,15 @@
 import 'dart:convert';
+import 'package:dentasuite/config/app_config.dart';
 import 'package:dentasuite/model/user.dart';
 import 'package:http/http.dart' as http;
 
 class LoginService {
-  static const String loginUrl =
-      'https://3c64tbzmtd.execute-api.ap-southeast-2.amazonaws.com/dev/login';
-
   Future<AppUser> loginRequest({
     required String username,
     required String password,
   }) async {
     final response = await http.post(
-      Uri.parse(loginUrl),
+      Uri.parse(AppConfig.loginUrl),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
