@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 2026/11/23-23:17:53.418 ecc Reusing MANIFEST C:\Users\Gabriel\AppData\Local\Temp\flutter_tools.c9ecf255\flutter_tools_chrome_device.f55b1dea\Default\Site Characteristics Database/MANIFEST-000001
 2026/11/23-23:17:53.419 ecc Recovering log #6
 2026/11/23-23:17:53.419 ecc Reusing old log C:\Users\Gabriel\AppData\Local\Temp\flutter_tools.c9ecf255\flutter_tools_chrome_device.f55b1dea\Default\Site Characteristics Database/000006.log 
 2026/11/23-23:17:53.421 ecc Delete type=0 #3
+=======
+2026/11/23-23:41:28.782 6940 Reusing MANIFEST C:\Users\CONSUE~1.MER\AppData\Local\Temp\flutter_tools.a22fede9\flutter_tools_chrome_device.8585fe13\Default\Site Characteristics Database/MANIFEST-000001
+2026/11/23-23:41:28.783 6940 Recovering log #6
+2026/11/23-23:41:28.784 6940 Reusing old log C:\Users\CONSUE~1.MER\AppData\Local\Temp\flutter_tools.a22fede9\flutter_tools_chrome_device.8585fe13\Default\Site Characteristics Database/000006.log 
+2026/11/23-23:41:28.785 6940 Delete type=0 #3
+>>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
