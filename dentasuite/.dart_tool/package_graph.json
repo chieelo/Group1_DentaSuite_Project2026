@@ -64,7 +64,6 @@
       "dependencies": [
         "characters",
         "collection",
-        "listen",
         "material_color_utilities",
         "meta",
         "sky_engine",
@@ -147,7 +146,7 @@
     },
     {
       "name": "test_api",
-      "version": "0.7.14",
+      "version": "0.7.12",
       "dependencies": [
         "async",
         "boolean_selector",
@@ -210,13 +209,6 @@
       "version": "0.13.0",
       "dependencies": [
         "collection"
-      ]
-    },
-    {
-      "name": "listen",
-      "version": "1.0.1",
-      "dependencies": [
-        "meta"
       ]
     },
     {
