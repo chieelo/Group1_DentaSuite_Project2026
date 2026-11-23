@@ -1,68 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// ─────────────────────────────────────────────────────────────
-// Brand colors
-// ─────────────────────────────────────────────────────────────
 const Color mint = Color(0xFFC2FFE1);
 const Color navy = Color(0xFF0D203B);
 const Color teal = Color(0xFF0E9F8E);
 const Color appWhite = Color(0xFFFFFFFF);
 
-// Kept for backward compatibility
+
 const Color background = appWhite;
 const Color blue = navy;
 const String appFont = 'Poppins';
 
-/// Gradient used for hero cards (white text is always readable on it,
-/// in both light and dark mode).
 const LinearGradient heroGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
   colors: [Color(0xFF0D203B), Color(0xFF116A74)],
 );
 
-// ─────────────────────────────────────────────────────────────
-// Palette: ONE place for light / dark colors.
-// Use `final p = context.pal;` then p.surface, p.textMain, etc.
-// ─────────────────────────────────────────────────────────────
+
 class AppPalette {
   const AppPalette(this.isDark);
 
   final bool isDark;
 
-  /// Page background
+
   Color get bg =>
       isDark ? const Color(0xFF08111F) : const Color(0xFFF3F7FB);
 
-  /// Cards, app bar, nav bar
+
   Color get surface =>
       isDark ? const Color(0xFF132339) : Colors.white;
 
-  /// Input fields, chips, subtle fills
   Color get surfaceAlt =>
       isDark ? const Color(0xFF1B2F4B) : const Color(0xFFEAF1F8);
 
-  /// Borders and dividers
+
   Color get border =>
       isDark ? const Color(0xFF27405F) : const Color(0xFFDDE6F0);
 
-  /// Primary text
   Color get textMain =>
       isDark ? const Color(0xFFEAF2FB) : navy;
 
-  /// Secondary text (labels, hints)
+
   Color get textSub =>
       isDark ? const Color(0xFF9FB3C8) : const Color(0xFF5B6B80);
 
-  /// Accent for icons, active states, primary buttons
+ 
   Color get accent => isDark ? mint : navy;
 
-  /// Soft accent background (selected nav item, icon bubbles)
+
   Color get accentSoft =>
       isDark ? mint.withValues(alpha: 0.14) : const Color(0xFFDDF7EC);
 
-  /// Text/icon color placed ON the accent color
+
   Color get onAccent => isDark ? navy : Colors.white;
 }
 
@@ -71,11 +61,7 @@ extension AppThemeContext on BuildContext {
       AppPalette(Theme.of(this).brightness == Brightness.dark);
 }
 
-// ─────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────
 
-/// Quick text style that always follows the current theme.
 TextStyle ts(
   BuildContext context,
   double size, {
@@ -93,8 +79,7 @@ TextStyle ts(
   );
 }
 
-/// Darkens a color in light mode so small text on a tinted
-/// background stays readable.
+
 Color readableOn(BuildContext context, Color c) {
   if (context.pal.isDark) return c;
   final hsl = HSLColor.fromColor(c);
@@ -125,11 +110,7 @@ Color genderColor(String gender) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Widgets
-// ─────────────────────────────────────────────────────────────
 
-/// Standard card used across the whole app.
 Widget appCard({
   required Widget child,
   EdgeInsetsGeometry padding = const EdgeInsets.all(16),
@@ -172,7 +153,7 @@ Widget appCard({
   );
 }
 
-/// Rounded square icon with a soft tinted background.
+
 Widget iconBubble(
   IconData icon,
   Color color, {
@@ -190,7 +171,7 @@ Widget iconBubble(
   );
 }
 
-/// Small pill label (status, gender, etc.)
+
 Widget statusChip(
   BuildContext context,
   String label,
@@ -225,7 +206,6 @@ Widget statusChip(
   );
 }
 
-/// Circle avatar with the patient's initials.
 Widget gradientAvatar(String name, {double size = 46}) {
   return Container(
     width: size,
