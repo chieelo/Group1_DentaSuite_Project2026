@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
-
 import '../config/app_config.dart';
 
 class PatientsService {
@@ -10,9 +8,6 @@ class PatientsService {
     'Accept': 'application/json',
   };
 
-  /// GET /patients
-  /// API response currently observed:
-  /// { "ok": true, "patients": [ { "patient": {...}, "medical": {...} } ] }
   Future<List<Map<String, String>>> fetchPatients() async {
     final response = await http.get(
       Uri.parse(AppConfig.patientsUrl),
@@ -39,8 +34,6 @@ class PatientsService {
         .toList();
   }
 
-  /// POST /patients. The caller must provide the exact request body
-  /// expected by the backend (confirm its schema with the API developer).
   Future<Map<String, dynamic>> createPatient(
     Map<String, dynamic> requestBody,
   ) async {
@@ -54,7 +47,6 @@ class PatientsService {
     return decoded;
   }
 
-  /// PATCH /patients/{id}. Supply only fields accepted by the backend.
   Future<Map<String, dynamic>> updatePatient(
     String id,
     Map<String, dynamic> requestBody,
@@ -69,7 +61,6 @@ class PatientsService {
     return decoded;
   }
 
-  /// DELETE /patients/{id}
   Future<void> deletePatient(String id) async {
     final response = await http.delete(
       Uri.parse(AppConfig.patientUrl(Uri.encodeComponent(id))),
@@ -113,8 +104,6 @@ class PatientsService {
 
     String value(dynamic input) => input?.toString() ?? '';
 
-    // Keep the existing UI's field names so PatientDetailsScreen
-    // and the patient cards do not need a redesign.
     return {
       'id': value(patient['p_id']),
       'name': value(patient['p_name']),
@@ -126,8 +115,6 @@ class PatientsService {
       'civilStatus': value(patient['p_civilstatus']),
       'occupation': value(patient['p_occupation']),
       'registeredAt': value(patient['p_dateregistered']),
-      // The current GET payload does not include last appointment date.
-      // Medical fields are retained as JSON for the details screen.
       'medicalData': jsonEncode(medical),
     };
   }

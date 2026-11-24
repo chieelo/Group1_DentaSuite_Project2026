@@ -1,28 +1,15 @@
 import 'dart:convert';
-<<<<<<< HEAD
-=======
 import 'package:dentasuite/config/app_config.dart';
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
 import 'package:dentasuite/model/user.dart';
 import 'package:http/http.dart' as http;
 
 class LoginService {
-<<<<<<< HEAD
-  static const String loginUrl =
-      'https://3c64tbzmtd.execute-api.ap-southeast-2.amazonaws.com/dev/login';
-
-=======
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
   Future<AppUser> loginRequest({
     required String username,
     required String password,
   }) async {
     final response = await http.post(
-<<<<<<< HEAD
-      Uri.parse(loginUrl),
-=======
       Uri.parse(AppConfig.loginUrl),
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -75,8 +62,4 @@ class LoginService {
 
     return loginUser;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066

@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
@@ -64,9 +63,7 @@ class PatientService {
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'Server error ${response.statusCode}: ${response.body}',
-      );
+      throw Exception('Server error ${response.statusCode}: ${response.body}');
     }
 
     final decoded = jsonDecode(response.body);
@@ -76,9 +73,7 @@ class PatientService {
     }
 
     if (decoded['ok'] != true) {
-      throw Exception(
-        decoded['message']?.toString() ?? 'API request failed.',
-      );
+      throw Exception(decoded['message']?.toString() ?? 'API request failed.');
     }
 
     final patientsData = decoded['patients'];
@@ -130,6 +125,27 @@ class PatientService {
 
       return result;
     }).toList();
+  }
+
+  Future<void> updatePatient(
+    String patientId,
+    Map<String, dynamic> requestBody,
+  ) async {
+    final response = await http.patch(
+      Uri.parse(AppConfig.patientUrl(Uri.encodeComponent(patientId))),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'Unable to update patient '
+        '(${response.statusCode}): ${response.body}',
+      );
+    }
   }
 
   String _string(dynamic value) {

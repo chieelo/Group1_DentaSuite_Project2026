@@ -1,13 +1,10 @@
-
 import 'package:dentasuite/screens/add_patient_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'patient_details_screen.dart';
-<<<<<<< HEAD
-import '../service/patients_service.dart';
-=======
+import 'edit_patient_screen.dart';
 import '../service/patient_service.dart';
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
 import '../widgets/shared_widgets.dart';
 
 class PatientsScreen extends StatefulWidget {
@@ -19,80 +16,25 @@ class PatientsScreen extends StatefulWidget {
 
 class _PatientsScreenState extends State<PatientsScreen> {
   final TextEditingController searchController = TextEditingController();
-<<<<<<< HEAD
-  final PatientsService _patientsService = PatientsService();
 
-  static const int _newPatientDays = 30;
-  String _selectedFilter = 'All Patients';
-  List<Map<String, String>> patients = [];
-  bool _isLoading = true;
-  String? _errorMessage;
-=======
   final PatientService patientService = PatientService();
 
+  static const List<String> _patientFilters = [
+    'All Patients',
+    'New Patients',
+    'Archived Patients',
+  ];
+
+  static const int _newPatientDays = 30;
+
+  String _selectedFilter = 'All Patients';
+
   late Future<List<Map<String, String>>> patientsFuture;
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
 
   @override
   void initState() {
     super.initState();
-<<<<<<< HEAD
-    _loadPatients();
-  }
-
-  DateTime? _patientDate(Map<String, String> patient, String key) {
-    final value = patient[key];
-    if (value == null || value.trim().isEmpty) return null;
-    return DateTime.tryParse(value);
-  }
-
-  bool _isNewPatient(Map<String, String> patient) {
-    final registeredAt = _patientDate(patient, 'registeredAt');
-    if (registeredAt == null) return false;
-    final age = DateTime.now().difference(registeredAt);
-    return !age.isNegative && age.inDays <= _newPatientDays;
-  }
-
-  // Archived filtering is intentionally not guessed here:
-  // the current GET response has no last-appointment date.
-  bool _isArchivedPatient(Map<String, String> patient) => false;
-
-  bool _matchesSelectedFilter(Map<String, String> patient) {
-    switch (_selectedFilter) {
-      case 'New Patients':
-        return _isNewPatient(patient);
-      case 'Archived Patients':
-        return _isArchivedPatient(patient);
-      default:
-        return true;
-    }
-  }
-
-  Future<void> _loadPatients() async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-    }
-
-    try {
-      final result = await _patientsService.fetchPatients();
-      if (!mounted) return;
-      setState(() {
-        patients = result;
-        _isLoading = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _errorMessage = error.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
-    }
-=======
     patientsFuture = patientService.getPatients();
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
   }
 
   @override
@@ -107,41 +49,111 @@ class _PatientsScreenState extends State<PatientsScreen> {
     });
   }
 
+  DateTime? _parsePatientDate(String? rawValue) {
+    final value = rawValue?.trim() ?? '';
+
+    if (value.isEmpty) return null;
+
+    final parsedIso = DateTime.tryParse(value);
+
+    if (parsedIso != null) return parsedIso;
+
+    final slashParts = value.split('/');
+
+    if (slashParts.length == 3) {
+      final month = int.tryParse(slashParts[0]);
+      final day = int.tryParse(slashParts[1]);
+      final year = int.tryParse(slashParts[2]);
+
+      if (month != null && day != null && year != null) {
+        return DateTime(year, month, day);
+      }
+    }
+
+    final dashParts = value.split('-');
+
+    if (dashParts.length == 3) {
+      final first = int.tryParse(dashParts[0]);
+      final second = int.tryParse(dashParts[1]);
+      final third = int.tryParse(dashParts[2]);
+
+      if (first != null && second != null && third != null) {
+        if (dashParts[0].length == 4) {
+          return DateTime(first, second, third);
+        }
+
+        return DateTime(third, second, first);
+      }
+    }
+
+    return null;
+  }
+
+  bool _isNewPatient(Map<String, String> patient) {
+    final registeredAt = _parsePatientDate(patient['dateregistered']);
+
+    if (registeredAt == null) return false;
+
+    final now = DateTime.now();
+
+    final cutoff = now.subtract(const Duration(days: _newPatientDays));
+
+    return !registeredAt.isBefore(cutoff) &&
+        !registeredAt.isAfter(now.add(const Duration(days: 1)));
+  }
+
+  bool _isArchivedPatient(Map<String, String> patient) {
+    final lastVisit = _parsePatientDate(patient['lastvisit']);
+
+    if (lastVisit == null) return true;
+
+    final cutoff = DateTime.now().subtract(const Duration(days: 365 * 2));
+
+    return lastVisit.isBefore(cutoff);
+  }
+
+  List<Map<String, String>> _applyPatientFilters(
+    List<Map<String, String>> patients,
+  ) {
+    switch (_selectedFilter) {
+      case 'New Patients':
+        return patients.where(_isNewPatient).toList();
+
+      case 'Archived Patients':
+        return patients.where(_isArchivedPatient).toList();
+
+      case 'All Patients':
+      default:
+        return patients;
+    }
+  }
+
   Future<void> _addPatient() async {
-    // The existing form currently returns local fields only.
-    // POST integration requires the backend's confirmed request-body schema.
     final newPatient = await Navigator.push<Map<String, String>>(
       context,
-      MaterialPageRoute(
-        builder: (_) => const AddPatientScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const AddPatientScreen()),
     );
 
     if (!mounted) return;
 
     if (newPatient != null) {
-<<<<<<< HEAD
-      await _loadPatients();
-=======
       _loadPatients();
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
     }
+  }
+
+  Future<void> _openPatientDetails(Map<String, String> patient) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PatientDetailsScreen(patient: patient)),
+    );
+
+    if (!mounted) return;
+    _loadPatients();
   }
 
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-<<<<<<< HEAD
-    final query = searchController.text.toLowerCase();
-
-    final filteredPatients = patients.where((patient) {
-      final matchesSearch =
-          (patient['name'] ?? '').toLowerCase().contains(query) ||
-          (patient['id'] ?? '').toLowerCase().contains(query);
-      return matchesSearch && _matchesSelectedFilter(patient);
-    }).toList();
-=======
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
 
     return Column(
       children: [
@@ -151,17 +163,8 @@ class _PatientsScreenState extends State<PatientsScreen> {
             children: [
               Row(
                 children: [
-<<<<<<< HEAD
                   Expanded(child: sectionTitle('Patient Directory')),
-                  IconButton(
-                    tooltip: 'Refresh patients',
-                    onPressed: _isLoading ? null : _loadPatients,
-                    icon: const Icon(Icons.refresh),
-=======
-                  Expanded(
-                    child: sectionTitle('Patient Directory'),
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
-                  ),
+
                   ElevatedButton.icon(
                     onPressed: _addPatient,
                     icon: const Icon(Icons.add, size: 18),
@@ -175,51 +178,9 @@ class _PatientsScreenState extends State<PatientsScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 15),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      'All Patients',
-                      'New Patients',
-                      'Archived Patients',
-                    ].map((filter) {
-                      final selected = _selectedFilter == filter;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(
-                            filter,
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: selected ? p.onAccent : p.textMain,
-                            ),
-                          ),
-                          selected: selected,
-                          onSelected: (_) {
-                            setState(() => _selectedFilter = filter);
-                          },
-                          selectedColor: p.accent,
-                          backgroundColor: p.surface,
-                          side: BorderSide(
-                            color: selected ? p.accent : p.border,
-                          ),
-                          showCheckmark: false,
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 5,
-                            vertical: 2,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
+
               TextField(
                 controller: searchController,
                 onChanged: (_) => setState(() {}),
@@ -231,117 +192,60 @@ class _PatientsScreenState extends State<PatientsScreen> {
                   prefixIcon: const Icon(Icons.search),
                 ),
               ),
+
+              const SizedBox(height: 12),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _patientFilters.map((filter) {
+                      final selected = _selectedFilter == filter;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(
+                            filter,
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          selected: selected,
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedFilter = filter;
+                            });
+                          },
+                          showCheckmark: false,
+                          selectedColor: p.accentSoft,
+                          backgroundColor: p.surface,
+                          side: BorderSide(
+                            color: selected ? p.accent : p.border,
+                          ),
+                          labelStyle: TextStyle(
+                            color: selected ? p.accent : p.textMain,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-        Expanded(
-<<<<<<< HEAD
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _errorMessage != null
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _errorMessage!,
-                              textAlign: TextAlign.center,
-                              style: ts(context, 12, sub: true),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton.icon(
-                              onPressed: _loadPatients,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Try again'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : filteredPatients.isEmpty
-                      ? emptyMessage(
-                          _selectedFilter == 'Archived Patients'
-                              ? 'Appointment history is not available yet.'
-                              : 'No patients found in this category.',
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                          itemCount: filteredPatients.length,
-                          itemBuilder: (context, index) {
-                            final patient = filteredPatients[index];
-                            final name = patient['name']?.isNotEmpty == true
-                                ? patient['name']!
-                                : 'Unnamed patient';
 
-                            return appCard(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(14),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        PatientDetailsScreen(patient: patient),
-                                  ),
-                                );
-                              },
-                              child: Row(
-                                children: [
-                                  gradientAvatar(name, size: 44),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          name,
-                                          style: ts(
-                                            context,
-                                            13,
-                                            weight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          patient['id'] ?? '',
-                                          style: ts(context, 11, sub: true),
-                                        ),
-                                        Text(
-                                          patient['phone'] ?? '',
-                                          style: ts(context, 11, sub: true),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if ((patient['gender'] ?? '').isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 6),
-                                      child: statusChip(
-                                        context,
-                                        patient['gender']!,
-                                        genderColor(patient['gender']!),
-                                      ),
-                                    ),
-                                  Icon(
-                                    Icons.chevron_right_rounded,
-                                    color: p.textSub,
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-=======
+        Expanded(
           child: FutureBuilder<List<Map<String, String>>>(
             future: patientsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
 
               if (snapshot.hasError) {
@@ -356,22 +260,24 @@ class _PatientsScreenState extends State<PatientsScreen> {
                           size: 40,
                           color: Colors.red,
                         ),
+
                         const SizedBox(height: 10),
+
                         Text(
                           'Unable to load patients.',
-                          style: ts(
-                            context,
-                            13,
-                            weight: FontWeight.w600,
-                          ),
+                          style: ts(context, 13, weight: FontWeight.w600),
                         ),
+
                         const SizedBox(height: 5),
+
                         Text(
                           '${snapshot.error}',
                           textAlign: TextAlign.center,
                           style: ts(context, 11, sub: true),
                         ),
+
                         const SizedBox(height: 12),
+
                         ElevatedButton.icon(
                           onPressed: _loadPatients,
                           icon: const Icon(Icons.refresh),
@@ -385,25 +291,35 @@ class _PatientsScreenState extends State<PatientsScreen> {
 
               final patients = snapshot.data ?? [];
 
+              final patientsByFilter = _applyPatientFilters(patients);
+
               final query = searchController.text.toLowerCase();
 
-              final filteredPatients = patients.where((patient) {
+              final filteredPatients = patientsByFilter.where((patient) {
                 final name = (patient['name'] ?? '').toLowerCase();
+
                 final id = (patient['id'] ?? '').toLowerCase();
 
                 return name.contains(query) || id.contains(query);
               }).toList();
 
               if (filteredPatients.isEmpty) {
-                return emptyMessage(
-                  'No matching patients found.',
-                );
+                final emptyText = _selectedFilter == 'All Patients'
+                    ? 'No matching patients found.'
+                    : 'No ${_selectedFilter.toLowerCase()} found.';
+
+                return emptyMessage(emptyText);
               }
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  _loadPatients();
-                  await patientsFuture;
+                  final newFuture = patientService.getPatients();
+
+                  setState(() {
+                    patientsFuture = newFuture;
+                  });
+
+                  await newFuture;
                 },
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -413,27 +329,25 @@ class _PatientsScreenState extends State<PatientsScreen> {
                     final patient = filteredPatients[index];
 
                     final name = patient['name'] ?? 'Unknown Patient';
+
                     final id = patient['id'] ?? '';
+
                     final phone = patient['phone'] ?? '';
+
                     final gender = patient['gender'] ?? '';
 
                     return appCard(
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(14),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PatientDetailsScreen(
-                              patient: patient,
-                            ),
-                          ),
-                        );
-                      },
+
+                      onTap: () => _openPatientDetails(patient),
+
                       child: Row(
                         children: [
                           gradientAvatar(name, size: 44),
+
                           const SizedBox(width: 12),
+
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -446,18 +360,19 @@ class _PatientsScreenState extends State<PatientsScreen> {
                                     weight: FontWeight.w600,
                                   ),
                                 ),
+
                                 const SizedBox(height: 2),
+
                                 Text(
                                   'Patient ID: $id',
                                   style: ts(context, 11, sub: true),
                                 ),
-                                Text(
-                                  phone,
-                                  style: ts(context, 11, sub: true),
-                                ),
+
+                                Text(phone, style: ts(context, 11, sub: true)),
                               ],
                             ),
                           ),
+
                           if (gender.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(right: 6),
@@ -467,10 +382,8 @@ class _PatientsScreenState extends State<PatientsScreen> {
                                 genderColor(gender),
                               ),
                             ),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            color: p.textSub,
-                          ),
+
+                          Icon(Icons.chevron_right_rounded, color: p.textSub),
                         ],
                       ),
                     );
@@ -479,7 +392,6 @@ class _PatientsScreenState extends State<PatientsScreen> {
               );
             },
           ),
->>>>>>> 868b1a19a975af7bb35714dbaebad48f23b9b066
         ),
       ],
     );
