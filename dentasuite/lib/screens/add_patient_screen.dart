@@ -79,6 +79,39 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     super.dispose();
   }
 
+  void clearForm() {
+    nameController.clear();
+    addressController.clear();
+    contactController.clear();
+    emailController.clear();
+    occupationController.clear();
+
+    treatmentController.clear();
+    illnessController.clear();
+    medicationController.clear();
+    otherAllergyController.clear();
+
+    setState(() {
+      gender = null;
+      civilStatus = null;
+      birthdate = null;
+
+      goodHealth = null;
+      underTreatment = null;
+      hospitalized = null;
+      seriousIllness = null;
+      takingMedication = null;
+      usesTobacco = null;
+
+      selectedAllergies.clear();
+      selectedIllnesses.clear();
+
+      breastfeeding = false;
+      pregnant = false;
+      birthControl = false;
+    });
+  }
+
   String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Full name is required.';
@@ -112,8 +145,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
       return null;
     }
 
-    if (!RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$')
-        .hasMatch(value.trim())) {
+    if (!RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$').hasMatch(value.trim())) {
       return 'Please enter a valid email address.';
     }
 
@@ -177,10 +209,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionHeader(
-                Icons.person,
-                'PATIENT INFORMATION',
-              ),
+              _sectionHeader(Icons.person, 'PATIENT INFORMATION'),
 
               _sectionCard([
                 _textField(
@@ -191,10 +220,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
                 _genderSelection(),
 
-                _textField(
-                  'Address',
-                  addressController,
-                ),
+                _textField('Address', addressController),
 
                 _textField(
                   'Contact No.',
@@ -203,22 +229,12 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                   validator: validateContact,
                 ),
 
-                _dateField(
-                  'Birthdate',
-                  birthdate,
-                  selectBirthdate,
-                ),
+                _dateField('Birthdate', birthdate, selectBirthdate),
 
                 _dropdown(
                   'Civil Status',
                   civilStatus,
-                  [
-                    'Single',
-                    'Married',
-                    'Widowed',
-                    'Separated',
-                    'Divorced',
-                  ],
+                  ['Single', 'Married', 'Widowed', 'Separated', 'Divorced'],
                   (value) {
                     setState(() => civilStatus = value);
                   },
@@ -231,18 +247,12 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                   validator: validateEmail,
                 ),
 
-                _textField(
-                  'Occupation',
-                  occupationController,
-                ),
+                _textField('Occupation', occupationController),
               ]),
 
               const SizedBox(height: 20),
 
-              _sectionHeader(
-                Icons.medical_services,
-                'MEDICAL RECORD',
-              ),
+              _sectionHeader(Icons.medical_services, 'MEDICAL RECORD'),
 
               _sectionCard([
                 Text(
@@ -256,13 +266,9 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
                 const SizedBox(height: 15),
 
-                _yesNoQuestion(
-                  'Are you in good health?',
-                  goodHealth,
-                  (value) {
-                    setState(() => goodHealth = value);
-                  },
-                ),
+                _yesNoQuestion('Are you in good health?', goodHealth, (value) {
+                  setState(() => goodHealth = value);
+                }),
 
                 _yesNoQuestion(
                   'Are you under medical treatment now?',
@@ -317,26 +323,19 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                     validator: validateRequired,
                   ),
 
-                _yesNoQuestion(
-                  'Do you use tobacco products?',
-                  usesTobacco,
-                  (value) {
-                    setState(() => usesTobacco = value);
-                  },
-                ),
+                _yesNoQuestion('Do you use tobacco products?', usesTobacco, (
+                  value,
+                ) {
+                  setState(() => usesTobacco = value);
+                }),
 
                 const Divider(height: 30),
 
-                _subheading(
-                  'Are you allergic to any of the following?',
-                ),
+                _subheading('Are you allergic to any of the following?'),
 
                 const SizedBox(height: 8),
 
-                _checkboxList(
-                  allergies,
-                  selectedAllergies,
-                ),
+                _checkboxList(allergies, selectedAllergies),
 
                 if (selectedAllergies.contains('Others'))
                   _textField(
@@ -350,53 +349,34 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
                   _subheading('For Women:'),
 
-                  _checkbox(
-                    'Breastfeeding',
-                    breastfeeding,
-                    (value) {
-                      setState(() {
-                        breastfeeding = value!;
-                      });
-                    },
-                  ),
+                  _checkbox('Breastfeeding', breastfeeding, (value) {
+                    setState(() {
+                      breastfeeding = value!;
+                    });
+                  }),
 
-                  _checkbox(
-                    'Pregnant',
-                    pregnant,
-                    (value) {
-                      setState(() {
-                        pregnant = value!;
-                      });
-                    },
-                  ),
+                  _checkbox('Pregnant', pregnant, (value) {
+                    setState(() {
+                      pregnant = value!;
+                    });
+                  }),
 
-                  _checkbox(
-                    'On birth control pills',
-                    birthControl,
-                    (value) {
-                      setState(() {
-                        birthControl = value!;
-                      });
-                    },
-                  ),
+                  _checkbox('On birth control pills', birthControl, (value) {
+                    setState(() {
+                      birthControl = value!;
+                    });
+                  }),
                 ],
 
                 const Divider(height: 30),
 
                 _subheading('Past/Present Illness'),
 
-                _text(
-                  'Please check if present:',
-                  sub: true,
-                  size: 11,
-                ),
+                _text('Please check if present:', sub: true, size: 11),
 
                 const SizedBox(height: 8),
 
-                _checkboxList(
-                  illnesses,
-                  selectedIllnesses,
-                ),
+                _checkboxList(illnesses, selectedIllnesses),
               ]),
 
               const SizedBox(height: 20),
@@ -409,15 +389,11 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                         Navigator.pop(context);
                       },
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 13,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
                       ),
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                        ),
+                      child: OutlinedButton(
+                        onPressed: clearForm,
+                        child: const Text('Clear'),
                       ),
                     ),
                   ),
@@ -428,9 +404,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                     child: ElevatedButton(
                       onPressed: savePatient,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 13,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
                       ),
                       child: Text(
                         'Save Patient',
@@ -460,19 +434,15 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     }
 
     if (gender == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a gender.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a gender.')));
       return;
     }
 
     if (birthdate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select the patient birthdate.'),
-        ),
+        const SnackBar(content: Text('Please select the patient birthdate.')),
       );
       return;
     }
@@ -484,9 +454,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         takingMedication == null ||
         usesTobacco == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please answer all medical questions.'),
-        ),
+        const SnackBar(content: Text('Please answer all medical questions.')),
       );
       return;
     }
@@ -501,25 +469,17 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     });
   }
 
-
   Widget _sectionHeader(IconData icon, String title) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 13,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
       decoration: BoxDecoration(
-        gradient: heroGradient, 
+        gradient: heroGradient,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 21,
-          ),
+          Icon(icon, color: Colors.white, size: 21),
           const SizedBox(width: 10),
           Text(
             title,
@@ -578,10 +538,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                       contentPadding: EdgeInsets.zero,
                       dense: true,
                       activeColor: p.accent,
-                      title: _text(
-                        option,
-                        size: 11,
-                      ),
+                      title: _text(option, size: 11),
                     ),
                   );
                 }).toList(),
@@ -622,7 +579,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
           const SizedBox(height: 6),
 
-
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,
@@ -661,21 +617,12 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
             isExpanded: true,
             dropdownColor: p.surface,
             style: ts(context, 12),
-            icon: Icon(
-              Icons.arrow_drop_down_rounded,
-              color: p.textSub,
-            ),
-            hint: Text(
-              'Select $label',
-              style: ts(context, 11, sub: true),
-            ),
+            icon: Icon(Icons.arrow_drop_down_rounded, color: p.textSub),
+            hint: Text('Select $label', style: ts(context, 11, sub: true)),
             items: options.map((option) {
               return DropdownMenuItem(
                 value: option,
-                child: Text(
-                  option,
-                  style: ts(context, 12),
-                ),
+                child: Text(option, style: ts(context, 12)),
               );
             }).toList(),
             onChanged: onChanged,
@@ -685,11 +632,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     );
   }
 
-  Widget _dateField(
-    String label,
-    DateTime? date,
-    VoidCallback onTap,
-  ) {
+  Widget _dateField(String label, DateTime? date, VoidCallback onTap) {
     final p = context.pal;
 
     return Padding(
@@ -705,10 +648,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
             onTap: onTap,
             borderRadius: BorderRadius.circular(12),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               decoration: BoxDecoration(
                 color: p.surfaceAlt,
                 borderRadius: BorderRadius.circular(12),
@@ -719,19 +659,11 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                   Expanded(
                     child: Text(
                       formatDate(date),
-                      style: ts(
-                        context,
-                        12,
-                        sub: date == null,
-                      ),
+                      style: ts(context, 12, sub: date == null),
                     ),
                   ),
 
-                  Icon(
-                    Icons.calendar_month,
-                    size: 17,
-                    color: p.textSub,
-                  ),
+                  Icon(Icons.calendar_month, size: 17, color: p.textSub),
                 ],
               ),
             ),
@@ -787,39 +719,28 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     );
   }
 
-  Widget _checkboxList(
-    List<String> options,
-    List<String> selected,
-  ) {
+  Widget _checkboxList(List<String> options, List<String> selected) {
     return Wrap(
       spacing: 12,
       runSpacing: 2,
       children: options.map((option) {
         return SizedBox(
           width: 210,
-          child: _checkbox(
-            option,
-            selected.contains(option),
-            (checked) {
-              setState(() {
-                if (checked == true) {
-                  selected.add(option);
-                } else {
-                  selected.remove(option);
-                }
-              });
-            },
-          ),
+          child: _checkbox(option, selected.contains(option), (checked) {
+            setState(() {
+              if (checked == true) {
+                selected.add(option);
+              } else {
+                selected.remove(option);
+              }
+            });
+          }),
         );
       }).toList(),
     );
   }
 
-  Widget _checkbox(
-    String label,
-    bool value,
-    ValueChanged<bool?> onChanged,
-  ) {
+  Widget _checkbox(String label, bool value, ValueChanged<bool?> onChanged) {
     final p = context.pal;
 
     return CheckboxListTile(
@@ -835,11 +756,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   }
 
   Widget _subheading(String label) {
-    return _text(
-      label,
-      size: 11,
-      weight: FontWeight.w600,
-    );
+    return _text(label, size: 11, weight: FontWeight.w600);
   }
 
   Widget _text(
