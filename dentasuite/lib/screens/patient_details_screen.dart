@@ -262,7 +262,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           _info(context, 'Occupation', _value('occupation')),
           _info(context, 'Date Registered', _value('dateregistered')),
           _info(context, 'Last Visit', _value('lastvisit')),
-          _info(context, 'Next Visit', _value('nextvisit')),
+          // _info(context, 'Next Visit', _value('nextvisit')),
         ],
       ),
     );
