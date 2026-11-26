@@ -16,7 +16,7 @@ class DentaSuiteApp extends StatefulWidget {
 }
 
 class _DentaSuiteAppState extends State<DentaSuiteApp> {
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.light; 
 
   void _changeTheme(bool isDark) {
     setState(() {
