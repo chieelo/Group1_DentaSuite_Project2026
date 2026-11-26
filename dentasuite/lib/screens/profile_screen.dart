@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../model/user.dart';
@@ -30,14 +29,8 @@ class ProfileScreen extends StatelessWidget {
 
         CircleAvatar(
           radius: 45,
-          backgroundColor: isDark
-              ? const Color(0xFF29435C)
-              : mint,
-          child: Icon(
-            Icons.person,
-            color: isDark ? mint : navy,
-            size: 50,
-          ),
+          backgroundColor: isDark ? const Color(0xFF29435C) : mint,
+          child: Icon(Icons.person, color: isDark ? mint : navy, size: 50),
         ),
 
         const SizedBox(height: 15),
@@ -78,10 +71,7 @@ class ProfileScreen extends StatelessWidget {
 
         Center(
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 15,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
             decoration: BoxDecoration(
               color: mint,
               borderRadius: BorderRadius.circular(20),
@@ -144,23 +134,20 @@ class ProfileScreen extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        Container(
-          decoration: BoxDecoration(
-            color: theme.cardColor,
+        Material(
+          color: theme.cardColor,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.dividerColor,
-            ),
+            side: BorderSide(color: theme.dividerColor),
           ),
+          clipBehavior: Clip.antiAlias,
           child: SwitchListTile(
-            value: isDarkMode,
+            value: isDark,
             onChanged: onThemeChanged,
             activeThumbColor: navy,
             activeTrackColor: mint,
             secondary: Icon(
-              isDarkMode
-                  ? Icons.dark_mode_rounded
-                  : Icons.light_mode_rounded,
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
               color: isDark ? mint : navy,
             ),
             title: Text(
@@ -172,7 +159,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              isDarkMode
+              isDark
                   ? 'Dark appearance is enabled'
                   : 'Light appearance is enabled',
               style: TextStyle(
@@ -187,27 +174,15 @@ class ProfileScreen extends StatelessWidget {
 
         OutlinedButton.icon(
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/',
-              (route) => false,
-            );
+            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           },
-          icon: const Icon(
-            Icons.logout,
-            color: Colors.red,
-          ),
+          icon: const Icon(Icons.logout, color: Colors.red),
           label: const Text(
             'Log Out',
-            style: TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
           ),
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(
-              color: Colors.redAccent,
-            ),
+            side: const BorderSide(color: Colors.redAccent),
             padding: const EdgeInsets.all(13),
           ),
         ),
@@ -217,10 +192,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionTitle(
-    BuildContext context,
-    String title,
-  ) {
+  Widget _sectionTitle(BuildContext context, String title) {
     final theme = Theme.of(context);
 
     return Text(
@@ -242,32 +214,27 @@ class ProfileScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.dividerColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: theme.dividerColor),
         ),
-      ),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: isDark ? mint : navy,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 12,
-            color: theme.colorScheme.onSurface,
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          leading: Icon(icon, color: isDark ? mint : navy),
+          title: Text(
+            title,
+            style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
           ),
+          trailing: Icon(
+            Icons.chevron_right,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          onTap: onTap,
         ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-        onTap: onTap,
       ),
     );
   }
